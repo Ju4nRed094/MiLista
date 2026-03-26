@@ -1,6 +1,7 @@
 package com.example.milista.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,11 +11,15 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,10 +30,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.milista.ui.theme.AcentoVerde
 import com.example.milista.ui.theme.FondoCard
 import com.example.milista.ui.theme.FondoPrincipal
 import com.example.milista.ui.theme.TextoPrincipal
 import com.example.milista.ui.theme.TextoSecundario
+import kotlinx.coroutines.launch
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -108,7 +115,8 @@ fun AddReminderScreen(
     val colorsList = listOf(
         Color(0xFFF472B6), Color(0xFF818CF8), Color(0xFFFBBF24),
         Color(0xFFFB7185), Color(0xFF2DD4BF), Color(0xFF60A5FA),
-        Color(0xFF34D399), Color(0xFFA78BFA), Color(0xFF38BDF8)
+        Color(0xFF34D399), Color(0xFFA78BFA), Color(0xFF38BDF8),
+        Color(0xFFFF7F50), Color(0xFF9ACD32), Color(0xFFDA70D6)
     )
 
     Scaffold(
@@ -157,7 +165,6 @@ fun AddReminderScreen(
                 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Selector de Emoji (Botón en lugar de TextField)
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -172,12 +179,12 @@ fun AddReminderScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (customEmoji.isEmpty()) "Seleccionar Emoji" else "Emoji: $customEmoji",
+                            text = if (customEmoji.isEmpty()) "Seleccionar Emoji" else "Emoji seleccionado",
                             color = if (customEmoji.isEmpty()) TextoSecundario else Color.White,
                             fontSize = 16.sp
                         )
                         Spacer(modifier = Modifier.weight(1f))
-                        Text(if (customEmoji.isEmpty()) "🔘" else customEmoji, fontSize = 24.sp)
+                        Text(if (customEmoji.isEmpty()) "🔘" else customEmoji, fontSize = 28.sp)
                     }
                 }
 
@@ -311,8 +318,8 @@ fun AddReminderScreen(
 
     if (showEmojiPicker) {
         EmojiPickerDialog(
-            onEmojiSelected = { 
-                customEmoji = it
+            onEmojiSelected = { selected ->
+                customEmoji = selected
                 showEmojiPicker = false
             },
             onDismiss = { showEmojiPicker = false }
@@ -320,32 +327,49 @@ fun AddReminderScreen(
     }
 }
 
+data class EmojiCategory(val name: String, val icon: String, val emojis: List<String>)
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EmojiPickerDialog(onEmojiSelected: (String) -> Unit, onDismiss: () -> Unit) {
-    val emojis = listOf(
-        "🎯", "🏀", "🎮", "🎸", "🍕", "🍔", "🍦", "🎬",
-        "🚗", "🚀", "💡", "📚", "💻", "🔥", "🌈", "⭐",
-        "⚽", "🎾", "🏋️", "🧘", "🚲", "🎨", "🎭", "🎤",
-        "🎧", "📸", "🎁", "🎈", "🎉", "🍹", "🍣", "🍩",
-        "🏝️", "🏖️", "🏔️", "🏕️", "🏠", "🏡", "🏢", "🏫",
-        "🦴", "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻",
-        "🧸", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸",
-        "🐵", "🐒", "🐔", "🐧", "🐦", "🐤", "🦆", "🦅",
-        "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛",
-        "🦋", "🐌", "🐞", "🐜", "🦟", "🦗", "🕷️", "🦂",
-        "🐢", "🐍", "🦎", "🐙", "🦑", "🦞", "🦀", "🐡",
-        "🐠", "🐟", "🐬", "🐳", "🐋", "🦈", "🐊", "🐅",
-        "🐆", "🦓", "🦍", "🦧", "🐘", "🦛", "🦏", "🐪",
-        "🐫", "🦒", "🦘", "🦬", "🐃", "🐂", "🐄", "🐎"
-    )
+    val categories = remember {
+        listOf(
+            EmojiCategory("Recientes", "🕒", listOf("🎯", "🏀", "🎮", "🎸", "🍕", "🍔", "🍦", "🎬", "🎨", "🎭", "🎤", "🎧", "📸", "🎁", "🎈", "🎉", "🔥", "🌈", "⭐", "✨", "⚡", "💎", "💯", "✅", "📍")),
+            EmojiCategory("Caras", "😀", listOf(
+                "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👹", "👺", "🤡", "👻", "💀", "☠️", "👽", "👾", "🤖", "🎃", "👋", "🤚", "🖐️", "✋", "🖖", "👌", "🤏", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊", "🤛", "🤜", "👏", "🙌", "👐", "🤲", "🤝", "🙏", "✍️", "💅", "🤳", "💪", "🦾", "🦵", "🦿", "🦶"
+            )),
+            EmojiCategory("Animales", "🐶", listOf(
+                "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐽", "🐸", "🐵", "🙊", "🙉", "🙊", "🐒", "🐔", "🐧", "🐦", "🐤", "🐣", "🐥", "🦆", "🦅", "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛", "🦋", "🐌", "🐞", "🐜", "🦟", "🦗", "🕷️", "🦂", "🐢", "🐍", "🦎", "🐙", "🦑", "🦞", "🦀", "🐡", "🐠", "🐟", "🐬", "🐳", "🐋", "🦈", "🐊", "🐅", "🐆", "🦓", "🦍", "🦧", "🐘", "🦛", "🦏", "🐪", "🐫", "🦒", "🦘", "🦬", "🐃", "🐂", "🐄", "🐎", "🐖", "🐏", "🐑", "🐐", "🦌", "🐕", "🐩", "🐈", "🐓", "🦃", "🦚", "🦜", "🦢", "🦩", "🕊️", "🐇", "🦝", "🦨", "🦡", "🦦", "🦥", "🐁", "🐀", "🐿️", "🦔", "🐾", "🐉", "🐲", "🌵", "🎄", "🌲", "🌳", "🌴", "🌱", "🌿", "☘️", "🍀", "🎍", "🎋", "🍃", "🍂", "🍁", "🍄", "🐚", "🌾", "💐", "🌷", "🌹", "🥀", "🌺", "🌸", "🌼", "🌻"
+            )),
+            EmojiCategory("Naturaleza", "🌍", listOf(
+                "🌞", "🌝", "🌛", "🌜", "🌚", "🌕", "🌖", "🌗", "🌘", "🌑", "🌒", "🌓", "🌔", "🌙", "🌎", "🌍", "🌏", "🪐", "💫", "⭐", "🌟", "✨", "⚡", "☄️", "💥", "🔥", "🌪️", "🌈", "☀️", "🌤️", "⛅", "🌥️", "☁️", "🌦️", "🌧️", "🌨️", "🌩️", "⛈️", "❄️", "☃️", "⛄", "🌬️", "💨", "💧", "💦", "☔", "☂️", "🌊", "🌫️", "🌬️", "☄️", "⚡", "💥", "🔥"
+            )),
+            EmojiCategory("Comida", "🍎", listOf(
+                "🍏", "🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🍈", "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥑", "🥦", "🥬", "🥒", "🌶️", "🌽", "🥕", "🥔", "🍠", "🥐", "🍞", "🥖", "🥨", "🥯", "🧀", "🥚", "🍳", "🥓", "🥩", "🍗", "🍖", "🍔", "🍟", "🍕", "🥪", "🌮", "🌯", "🥗", "🥘", "🍝", "🍜", "🍲", "🍛", "🍣", "🍱", "🥟", "🍤", "🍙", "🍚", "🍘", "🍥", "🥠", "🥮", "🍢", "🍢", "🍡", "🍧", "🍨", "🍦", "🥧", "🍰", "🎂", "🍮", "🍭", "🍬", "🍫", "🍿", "🍩", "🍪", "🍺", "🍻", "🥂", "🍷", "🥃", "🍸", "🍹", "🍾", "🥤", "🥤", "🧃", "🍵", "☕", "☕", "🥛", "🧂", "🥢", "🥣", "🥡", "🍴", "🥄", "🥧", "🧁", "🍭", "🍬", "🍫", "🍿", "🍩", "🍪"
+            )),
+            EmojiCategory("Actividad", "⚽", listOf(
+                "⚽", "🏀", "🏈", "⚾", "🥎", "🎾", "🏐", "🏉", "🎱", "🏓", "🏸", "🥅", "🏒", "🦑", "🏏", "⛳", "🏹", "🎣", "🥊", "🥋", "⛸️", "🎿", "🛷", "🛹", "🚴", "🚴", "🚵", "🚵", "🏇", "🧗", "🧗", "🤺", "🏋️", "🏋️", "🤸", "🤸", "🤽", "🤽", "🚣", "🚣", "🏄", "🏄", "🏊", "🏊", "🧘", "🧘", "🕹️", "🎮", "🕹️", "🎰", "🎲", "♟️", "🧩", "🎳", "🎭", "🎨", "🧵", "🧶", "🎼", "🎵", "🎶", "🎹", "🎸", "🎻", "🎷", "🎺", "🥁", "🎤", "🎧", "🎬", "🎟️", "🎫", "🎖️", "🏆", "🏅", "🥇", "🥈", "🥉"
+            )),
+            EmojiCategory("Viajes", "🚗", listOf(
+                "🚗", "🚕", "🚙", "🚌", "🚎", "🏎️", "🚓", "🚑", "🚒", "🚐", "🚚", "🚛", "🚜", "🛵", "🏍️", "🚲", "🛴", "🛹", "🚏", "🛤️", "🛤️", "⚓", "⛵", "🛶", "🚤", "🛳️", "⛴️", "🚢", "✈️", "🛩️", "🛫", "🛬", "🚁", "🚠", "🚟", "🛰️", "🚀", "🛸", "🌍", "🌎", "🌏", "🌋", "⛰️", "🏔️", "🗻", "🏕️", "🏖️", "🏜️", "🏝️", "🏙️", "🏗️", "🏢", "🏘️", "🛖", "🏠", "🏡", "🏘️", "🏚️", "🏢", "🏣", "🏤", "🏥", "🏦", "🏨", "🏩", "🏪", "🏫", "🏬", "🏭", "🏰", "🏯", "💒", "🗼", "🗽", "🕌", "⛪", "⛩️", "🕍", "🕋", "⛲", "⛺", "🌁", "🌃", "🏙️", "🌅", "🌅", "🌆", "🌇", "🌉", "🎠", "🎡", "🎢", "🚂", "🚃", "🚄", "🚅", "🚆", "🚇", "🚈", "🚉", "🚊", "🚝", "🚞", "🚋"
+            )),
+            EmojiCategory("Objetos", "💡", listOf(
+                "⌚", "📱", "📲", "💻", "⌨️", "🖥️", "🖨️", "🖱️", "🖱️", "🕹️", "🗜️", "💽", "💾", "💿", "📀", "📼", "📷", "📸", "📹", "🎥", "📽️", "🎞️", "📞", "☎️", "📟", "📠", "📺", "📻", "🎙️", "🎚️", "🎛️", "🧭", "⏱️", "⏲️", "⏰", "🕰️", "⌛", "⏳", "📡", "🔋", "🔌", "💡", "🔦", "🕯️", "🪔", "🧯", "🗑️", "🛢️", "💸", "💵", "💴", "💶", "💷", "💰", "💳", "💎", "⚖️", "🧰", "🔧", "🔨", "⚒️", "🛠️", "⛏️", "🔩", "⚙️", "⚙️", "🧱", "⛓️", "🧲", "🔫", "💣", "🧨", "🔪", "🗡️", "⚔️", "🛡️", "🚬", "⚰️", "⚱️", "🏺", "🔮", "📿", "🧿", "💈", "⚗️", "🔭", "🔬", "🕳️", "💊", "💉", "🩸", "🧬", "🦠", "🌡️", "🧹", "🧺", "🧻", "🚽", "🚰", "🚿", "🛁", "🧼", "🪒", "🧴", "🧷", "🗝️", "🔑", "🔐", "🔒", "🔓", "🔔", "🔕", "📣", "📢", "💬", "💭", "🗯️", "✉️", "📧", "📧", "📧", "📦", "📫", "📪", "📬", "📭", "📮", "🗳️", "📝", "📁", "📂", "📅", "📆", "🗒️", "🗓️", "📖", "📜", "📜", "🔖", "🏷️", "📎", "🖇️", "📐", "📏", "📌", "📍", "✂️", "✒️", "🖋️", "🖊️", "🖌️", "🖍️", "🔍", "🔎", "🛡️", "🏹", "🗡️", "⚔️", "🔫"
+            ))
+        )
+    }
+
+    var searchQuery by remember { mutableStateOf("") }
+    val pagerState = rememberPagerState(pageCount = { categories.size })
+    val scope = rememberCoroutineScope()
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = FondoCard,
-            modifier = Modifier.fillMaxWidth().height(450.dp)
+            modifier = Modifier.fillMaxWidth().height(550.dp)
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -354,32 +378,101 @@ fun EmojiPickerDialog(onEmojiSelected: (String) -> Unit, onDismiss: () -> Unit) 
                     Text(
                         "Elige un Emoji",
                         style = MaterialTheme.typography.titleLarge,
-                        color = TextoPrincipal,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
                     }
                 }
-                Spacer(modifier = Modifier.height(20.dp))
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 50.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(emojis) { emoji ->
-                        Box(
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color.White.copy(alpha = 0.05f))
-                                .clickable { onEmojiSelected(emoji) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(emoji, fontSize = 24.sp)
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Buscar emoji...", color = TextoSecundario) },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextoSecundario) },
+                    shape = RoundedCornerShape(16.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.05f)
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (searchQuery.isEmpty()) {
+                    ScrollableTabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        edgePadding = 0.dp,
+                        containerColor = Color.Transparent,
+                        contentColor = Color.White,
+                        indicator = { tabPositions ->
+                            if (pagerState.currentPage < tabPositions.size) {
+                                TabRowDefaults.SecondaryIndicator(
+                                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                                    color = AcentoVerde
+                                )
+                            }
+                        },
+                        divider = {}
+                    ) {
+                        categories.forEachIndexed { index, category ->
+                            Tab(
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    scope.launch { pagerState.animateScrollToPage(index) }
+                                },
+                                text = { Text(category.icon, fontSize = 20.sp) }
+                            )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.weight(1f)
+                    ) { page ->
+                        EmojiGrid(emojis = categories[page].emojis, onEmojiSelected)
+                    }
+                } else {
+                    val filteredEmojis = remember(searchQuery) {
+                        categories.flatMap { it.emojis }.distinct().take(100)
+                    }
+                    
+                    Box(modifier = Modifier.weight(1f)) {
+                        EmojiGrid(emojis = filteredEmojis, onEmojiSelected)
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun EmojiGrid(emojis: List<String>, onEmojiSelected: (String) -> Unit) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 45.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(emojis) { emoji ->
+            Box(
+                modifier = Modifier
+                    .size(45.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .clickable { onEmojiSelected(emoji) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(emoji, fontSize = 22.sp)
             }
         }
     }

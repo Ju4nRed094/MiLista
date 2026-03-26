@@ -5,11 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,6 +17,7 @@ import com.example.milista.ui.AddTaskScreen
 import com.example.milista.ui.HomeScreen
 import com.example.milista.ui.ListasScreen
 import com.example.milista.ui.MiListaViewModel
+import com.example.milista.ui.SettingsScreen
 import com.example.milista.ui.theme.MiListaTheme
 
 class MainActivity : ComponentActivity() {
@@ -52,7 +50,8 @@ class MainActivity : ComponentActivity() {
                         HomeScreen(
                             viewModel = viewModel,
                             onAddLista = { navController.navigate("listas") },
-                            onAddReminder = { tipo -> navController.navigate("add_reminder/$tipo") }
+                            onAddReminder = { tipo -> navController.navigate("add_reminder/$tipo") },
+                            onNavigateToSettings = { navController.navigate("settings") }
                         )
                     }
                     composable("listas") {
@@ -82,6 +81,11 @@ class MainActivity : ComponentActivity() {
                         AddReminderScreen(
                             viewModel = viewModel,
                             tipo = tipo,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable("settings") {
+                        SettingsScreen(
                             onBack = { navController.popBackStack() }
                         )
                     }
