@@ -2,16 +2,27 @@ package com.example.milista.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val FondoPrincipal = Color(0xFF0D1B2A)
-val FondoCard = Color(0xFF1B263B)
-val AcentoVerde = Color(0xFF52D1A5)
-val TextoPrincipal = Color(0xFFFFFFFF)
-val TextoSecundario = Color(0xFF94A3B8)
+// Paleta Premium MiLista (Samsung One UI Style)
+val SamsungGreen = Color(0xFF67E36C)
+val SamsungBlue = Color(0xFF3E78FF)
+val SamsungRed = Color(0xFFF14141)
+val SamsungPurple = Color(0xFF818CF8)
+val SamsungOrange = Color(0xFFF97316)
 
-// Colores para los círculos de categorías
-val CircleTareas = Color(0xFF38BDF8)
-val CircleCompras = Color(0xFFFB7185)
-val CircleTrabajo = Color(0xFFFBBF24)
-val CircleEscuela = Color(0xFF818CF8)
-val CircleEventos = Color(0xFFF472B6)
-val CircleViajes = Color(0xFF2DD4BF)
+// Colores de Fondo y Superficie
+val BackgroundDark = Color(0xFF070B11)
+val CardDark = Color(0xFF141A22)
+val SoftWhite = Color(0xFFF5F5F5)
+val GrayText = Color(0xFF9AA0A6)
+
+// Modo Claro (Refinado)
+val LightBackground = Color(0xFFF2F2F7)
+val LightSurface = Color(0xFFFFFFFF)
+val LightOnSurface = Color(0xFF000000)
+
+// Alias para compatibilidad
+val FondoPrincipal = BackgroundDark
+val FondoCard = CardDark
+val AcentoVerde = SamsungGreen
+val TextoPrincipal = SoftWhite
+val TextoSecundario = GrayText

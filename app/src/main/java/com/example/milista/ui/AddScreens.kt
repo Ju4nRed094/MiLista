@@ -16,11 +16,17 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import com.example.milista.ui.utils.getTranslatedText
+import com.example.milista.ui.utils.getLocaleCode
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.intl.LocaleList
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,54 +36,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.milista.ui.theme.AcentoVerde
-import com.example.milista.ui.theme.FondoCard
-import com.example.milista.ui.theme.FondoPrincipal
-import com.example.milista.ui.theme.TextoPrincipal
-import com.example.milista.ui.theme.TextoSecundario
+import com.example.milista.ui.theme.*
 import kotlinx.coroutines.launch
 import java.util.*
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddTaskScreen(
-    viewModel: MiListaViewModel,
-    listaId: Int,
-    onBack: () -> Unit
-) {
-    var title by remember { mutableStateOf("") }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Nueva Tarea") })
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("¿Qué quieres hacer?") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    if (title.isNotBlank()) {
-                        viewModel.agregarTarea(title, listaId)
-                        onBack()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Guardar Tarea")
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,47 +48,33 @@ fun AddReminderScreen(
     onBack: () -> Unit
 ) {
     val isOtro = tipo == "Otro"
+    val selectedLanguage by viewModel.selectedLanguage.collectAsState()
+    val localeCode = remember(selectedLanguage) { getLocaleCode(selectedLanguage) }
     
     var customNombre by remember { mutableStateOf("") }
     var customEmoji by remember { mutableStateOf("") }
-    var customColor by remember { mutableStateOf(Color(0xFF38BDF8)) }
+    var customColor by remember { mutableStateOf(SamsungBlue) }
     var showEmojiPicker by remember { mutableStateOf(false) }
 
-    val typeInfo = ReminderConstants.getByType(tipo)
-    
-    val datePickerState = rememberDatePickerState(
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                return utcTimeMillis >= calendar.timeInMillis
-            }
-        }
-    )
-    
+    val datePickerState = rememberDatePickerState()
     val timePickerState = rememberTimePickerState()
     var currentStep by remember { mutableIntStateOf(if (isOtro) 0 else 1) }
 
     val colorsList = listOf(
-        Color(0xFFF472B6), Color(0xFF818CF8), Color(0xFFFBBF24),
-        Color(0xFFFB7185), Color(0xFF2DD4BF), Color(0xFF60A5FA),
-        Color(0xFF34D399), Color(0xFFA78BFA), Color(0xFF38BDF8),
-        Color(0xFFFF7F50), Color(0xFF9ACD32), Color(0xFFDA70D6)
+        SamsungBlue, SamsungGreen, SamsungRed, SamsungOrange, SamsungPurple,
+        Color(0xFFF472B6), Color(0xFFFBBF24), Color(0xFF2DD4BF),
+        Color(0xFF60A5FA), Color(0xFF34D399), Color(0xFFA78BFA), Color(0xFF38BDF8)
     )
 
     Scaffold(
-        containerColor = FondoPrincipal,
+        containerColor = BackgroundDark,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Configurar Aviso", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = FondoPrincipal,
-                    titleContentColor = TextoPrincipal
-                )
+            TopAppBar(
+                title = { Text(getTranslatedText("Configurar Aviso", selectedLanguage), fontWeight = FontWeight.Bold, color = Color.White) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = Color.White) }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundDark)
             )
         }
     ) { padding ->
@@ -135,53 +82,48 @@ fun AddReminderScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             
             if (currentStep == 0 && isOtro) {
                 Text(
-                    "Personaliza tu aviso",
+                    getTranslatedText("Personaliza tu aviso", selectedLanguage),
                     color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.align(Alignment.Start)
                 )
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 OutlinedTextField(
                     value = customNombre,
                     onValueChange = { customNombre = it },
-                    label = { Text("Nombre del evento") },
+                    label = { Text(getTranslatedText("Nombre del evento", selectedLanguage), color = GrayText) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
                         focusedBorderColor = customColor,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f)
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.03f)
                     ),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(hintLocales = LocaleList(Locale(localeCode)))
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .clickable { showEmojiPicker = true },
+                    modifier = Modifier.fillMaxWidth().height(64.dp).clickable { showEmojiPicker = true },
                     shape = RoundedCornerShape(16.dp),
                     color = Color.White.copy(alpha = 0.05f),
-                    border = BorderStroke(1.dp, if(customEmoji.isEmpty()) Color.White.copy(alpha = 0.3f) else customColor)
+                    border = BorderStroke(1.dp, if(customEmoji.isEmpty()) Color.White.copy(alpha = 0.1f) else customColor)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = if (customEmoji.isEmpty()) "Seleccionar Emoji" else "Emoji seleccionado",
-                            color = if (customEmoji.isEmpty()) TextoSecundario else Color.White,
-                            fontSize = 16.sp
+                            text = if (customEmoji.isEmpty()) getTranslatedText("Seleccionar Icono", selectedLanguage) else getTranslatedText("Icono seleccionado", selectedLanguage),
+                            color = if (customEmoji.isEmpty()) GrayText else Color.White,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Text(if (customEmoji.isEmpty()) "🔘" else customEmoji, fontSize = 28.sp)
@@ -190,23 +132,17 @@ fun AddReminderScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                Text("Elige un color:", color = TextoSecundario, modifier = Modifier.align(Alignment.Start))
-                Spacer(modifier = Modifier.height(12.dp))
+                Text(getTranslatedText("Color de categoría", selectedLanguage), color = GrayText, modifier = Modifier.align(Alignment.Start), fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(16.dp))
                 
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                     items(colorsList) { color ->
                         Box(
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(44.dp)
                                 .clip(CircleShape)
                                 .background(color)
-                                .border(
-                                    if (customColor == color) BorderStroke(3.dp, Color.White) else BorderStroke(0.dp, Color.Transparent),
-                                    CircleShape
-                                )
+                                .border(if (customColor == color) BorderStroke(3.dp, Color.White) else BorderStroke(0.dp, Color.Transparent), CircleShape)
                                 .clickable { customColor = color }
                         )
                     }
@@ -216,71 +152,69 @@ fun AddReminderScreen(
 
                 Button(
                     onClick = { currentStep = 1 },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    modifier = Modifier.fillMaxWidth().height(60.dp),
                     enabled = customNombre.isNotBlank() && customEmoji.isNotBlank(),
                     colors = ButtonDefaults.buttonColors(containerColor = customColor),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(30.dp)
                 ) {
-                    Text("Siguiente: Fecha", fontWeight = FontWeight.Bold)
+                    Text(getTranslatedText("Siguiente", selectedLanguage), fontWeight = FontWeight.Bold, color = if(customColor == SamsungGreen) Color.Black else Color.White)
                 }
             } else if (currentStep == 1) {
-                val currentColor = if (isOtro) customColor else typeInfo.color
+                val currentColor = if (isOtro) customColor else SamsungBlue
                 
                 Text(
-                    "1. Selecciona la fecha",
+                    getTranslatedText("Selecciona la fecha", selectedLanguage),
                     color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.align(Alignment.Start)
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 DatePicker(
                     state = datePickerState,
                     showModeToggle = false,
                     colors = DatePickerDefaults.colors(
-                        containerColor = FondoPrincipal,
-                        titleContentColor = TextoPrincipal,
-                        headlineContentColor = TextoPrincipal,
+                        containerColor = BackgroundDark,
+                        titleContentColor = Color.White,
+                        headlineContentColor = Color.White,
                         selectedDayContainerColor = currentColor,
                         todayContentColor = currentColor,
-                        disabledDayContentColor = Color.Gray
+                        dayContentColor = Color.White,
+                        weekdayContentColor = GrayText
                     )
                 )
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 Button(
                     onClick = { currentStep = 2 },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    modifier = Modifier.fillMaxWidth().height(60.dp),
                     enabled = datePickerState.selectedDateMillis != null,
                     colors = ButtonDefaults.buttonColors(containerColor = currentColor),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(30.dp)
                 ) {
-                    Text("Siguiente: Elegir Hora", fontWeight = FontWeight.Bold)
-                }
-                if (isOtro) {
-                    TextButton(onClick = { currentStep = 0 }) {
-                        Text("Volver a Personalizar", color = TextoSecundario)
-                    }
+                    Text(getTranslatedText("Siguiente", selectedLanguage), fontWeight = FontWeight.Bold, color = if(currentColor == SamsungGreen) Color.Black else Color.White)
                 }
             } else {
-                val currentColor = if (isOtro) customColor else typeInfo.color
+                val currentColor = if (isOtro) customColor else SamsungBlue
                 
                 Text(
-                    "2. Selecciona la hora",
+                    getTranslatedText("Selecciona la hora", selectedLanguage),
                     color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.align(Alignment.Start)
                 )
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(40.dp))
                 TimePicker(
                     state = timePickerState,
                     colors = TimePickerDefaults.colors(
                         clockDialColor = Color.White.copy(alpha = 0.05f),
                         selectorColor = currentColor,
-                        periodSelectorSelectedContainerColor = currentColor.copy(alpha = 0.2f)
+                        periodSelectorSelectedContainerColor = currentColor.copy(alpha = 0.2f),
+                        timeSelectorSelectedContainerColor = currentColor.copy(alpha = 0.2f),
+                        timeSelectorSelectedContentColor = Color.White,
+                        timeSelectorUnselectedContainerColor = Color.White.copy(0.05f),
+                        timeSelectorUnselectedContentColor = Color.White
                     )
                 )
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 Button(
                     onClick = {
                         val calendar = Calendar.getInstance().apply {
@@ -302,15 +236,11 @@ fun AddReminderScreen(
                         }
                         onBack()
                     },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    modifier = Modifier.fillMaxWidth().height(60.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = currentColor),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(30.dp)
                 ) {
-                    Text("Guardar Evento", fontWeight = FontWeight.Bold)
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                TextButton(onClick = { currentStep = 1 }) {
-                    Text("Volver a Fecha", color = TextoSecundario)
+                    Text(getTranslatedText("Guardar Evento", selectedLanguage), fontWeight = FontWeight.Bold, color = if(currentColor == SamsungGreen) Color.Black else Color.White)
                 }
             }
         }
@@ -318,6 +248,7 @@ fun AddReminderScreen(
 
     if (showEmojiPicker) {
         EmojiPickerDialog(
+            viewModel = viewModel,
             onEmojiSelected = { selected ->
                 customEmoji = selected
                 showEmojiPicker = false
@@ -331,31 +262,18 @@ data class EmojiCategory(val name: String, val icon: String, val emojis: List<St
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun EmojiPickerDialog(onEmojiSelected: (String) -> Unit, onDismiss: () -> Unit) {
+fun EmojiPickerDialog(
+    viewModel: MiListaViewModel,
+    onEmojiSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val selectedLanguage by viewModel.selectedLanguage.collectAsState()
     val categories = remember {
         listOf(
-            EmojiCategory("Recientes", "🕒", listOf("🎯", "🏀", "🎮", "🎸", "🍕", "🍔", "🍦", "🎬", "🎨", "🎭", "🎤", "🎧", "📸", "🎁", "🎈", "🎉", "🔥", "🌈", "⭐", "✨", "⚡", "💎", "💯", "✅", "📍")),
-            EmojiCategory("Caras", "😀", listOf(
-                "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👹", "👺", "🤡", "👻", "💀", "☠️", "👽", "👾", "🤖", "🎃", "👋", "🤚", "🖐️", "✋", "🖖", "👌", "🤏", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊", "🤛", "🤜", "👏", "🙌", "👐", "🤲", "🤝", "🙏", "✍️", "💅", "🤳", "💪", "🦾", "🦵", "🦿", "🦶"
-            )),
-            EmojiCategory("Animales", "🐶", listOf(
-                "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐽", "🐸", "🐵", "🙊", "🙉", "🙊", "🐒", "🐔", "🐧", "🐦", "🐤", "🐣", "🐥", "🦆", "🦅", "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛", "🦋", "🐌", "🐞", "🐜", "🦟", "🦗", "🕷️", "🦂", "🐢", "🐍", "🦎", "🐙", "🦑", "🦞", "🦀", "🐡", "🐠", "🐟", "🐬", "🐳", "🐋", "🦈", "🐊", "🐅", "🐆", "🦓", "🦍", "🦧", "🐘", "🦛", "🦏", "🐪", "🐫", "🦒", "🦘", "🦬", "🐃", "🐂", "🐄", "🐎", "🐖", "🐏", "🐑", "🐐", "🦌", "🐕", "🐩", "🐈", "🐓", "🦃", "🦚", "🦜", "🦢", "🦩", "🕊️", "🐇", "🦝", "🦨", "🦡", "🦦", "🦥", "🐁", "🐀", "🐿️", "🦔", "🐾", "🐉", "🐲", "🌵", "🎄", "🌲", "🌳", "🌴", "🌱", "🌿", "☘️", "🍀", "🎍", "🎋", "🍃", "🍂", "🍁", "🍄", "🐚", "🌾", "💐", "🌷", "🌹", "🥀", "🌺", "🌸", "🌼", "🌻"
-            )),
-            EmojiCategory("Naturaleza", "🌍", listOf(
-                "🌞", "🌝", "🌛", "🌜", "🌚", "🌕", "🌖", "🌗", "🌘", "🌑", "🌒", "🌓", "🌔", "🌙", "🌎", "🌍", "🌏", "🪐", "💫", "⭐", "🌟", "✨", "⚡", "☄️", "💥", "🔥", "🌪️", "🌈", "☀️", "🌤️", "⛅", "🌥️", "☁️", "🌦️", "🌧️", "🌨️", "🌩️", "⛈️", "❄️", "☃️", "⛄", "🌬️", "💨", "💧", "💦", "☔", "☂️", "🌊", "🌫️", "🌬️", "☄️", "⚡", "💥", "🔥"
-            )),
-            EmojiCategory("Comida", "🍎", listOf(
-                "🍏", "🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🍈", "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥑", "🥦", "🥬", "🥒", "🌶️", "🌽", "🥕", "🥔", "🍠", "🥐", "🍞", "🥖", "🥨", "🥯", "🧀", "🥚", "🍳", "🥓", "🥩", "🍗", "🍖", "🍔", "🍟", "🍕", "🥪", "🌮", "🌯", "🥗", "🥘", "🍝", "🍜", "🍲", "🍛", "🍣", "🍱", "🥟", "🍤", "🍙", "🍚", "🍘", "🍥", "🥠", "🥮", "🍢", "🍢", "🍡", "🍧", "🍨", "🍦", "🥧", "🍰", "🎂", "🍮", "🍭", "🍬", "🍫", "🍿", "🍩", "🍪", "🍺", "🍻", "🥂", "🍷", "🥃", "🍸", "🍹", "🍾", "🥤", "🥤", "🧃", "🍵", "☕", "☕", "🥛", "🧂", "🥢", "🥣", "🥡", "🍴", "🥄", "🥧", "🧁", "🍭", "🍬", "🍫", "🍿", "🍩", "🍪"
-            )),
-            EmojiCategory("Actividad", "⚽", listOf(
-                "⚽", "🏀", "🏈", "⚾", "🥎", "🎾", "🏐", "🏉", "🎱", "🏓", "🏸", "🥅", "🏒", "🦑", "🏏", "⛳", "🏹", "🎣", "🥊", "🥋", "⛸️", "🎿", "🛷", "🛹", "🚴", "🚴", "🚵", "🚵", "🏇", "🧗", "🧗", "🤺", "🏋️", "🏋️", "🤸", "🤸", "🤽", "🤽", "🚣", "🚣", "🏄", "🏄", "🏊", "🏊", "🧘", "🧘", "🕹️", "🎮", "🕹️", "🎰", "🎲", "♟️", "🧩", "🎳", "🎭", "🎨", "🧵", "🧶", "🎼", "🎵", "🎶", "🎹", "🎸", "🎻", "🎷", "🎺", "🥁", "🎤", "🎧", "🎬", "🎟️", "🎫", "🎖️", "🏆", "🏅", "🥇", "🥈", "🥉"
-            )),
-            EmojiCategory("Viajes", "🚗", listOf(
-                "🚗", "🚕", "🚙", "🚌", "🚎", "🏎️", "🚓", "🚑", "🚒", "🚐", "🚚", "🚛", "🚜", "🛵", "🏍️", "🚲", "🛴", "🛹", "🚏", "🛤️", "🛤️", "⚓", "⛵", "🛶", "🚤", "🛳️", "⛴️", "🚢", "✈️", "🛩️", "🛫", "🛬", "🚁", "🚠", "🚟", "🛰️", "🚀", "🛸", "🌍", "🌎", "🌏", "🌋", "⛰️", "🏔️", "🗻", "🏕️", "🏖️", "🏜️", "🏝️", "🏙️", "🏗️", "🏢", "🏘️", "🛖", "🏠", "🏡", "🏘️", "🏚️", "🏢", "🏣", "🏤", "🏥", "🏦", "🏨", "🏩", "🏪", "🏫", "🏬", "🏭", "🏰", "🏯", "💒", "🗼", "🗽", "🕌", "⛪", "⛩️", "🕍", "🕋", "⛲", "⛺", "🌁", "🌃", "🏙️", "🌅", "🌅", "🌆", "🌇", "🌉", "🎠", "🎡", "🎢", "🚂", "🚃", "🚄", "🚅", "🚆", "🚇", "🚈", "🚉", "🚊", "🚝", "🚞", "🚋"
-            )),
-            EmojiCategory("Objetos", "💡", listOf(
-                "⌚", "📱", "📲", "💻", "⌨️", "🖥️", "🖨️", "🖱️", "🖱️", "🕹️", "🗜️", "💽", "💾", "💿", "📀", "📼", "📷", "📸", "📹", "🎥", "📽️", "🎞️", "📞", "☎️", "📟", "📠", "📺", "📻", "🎙️", "🎚️", "🎛️", "🧭", "⏱️", "⏲️", "⏰", "🕰️", "⌛", "⏳", "📡", "🔋", "🔌", "💡", "🔦", "🕯️", "🪔", "🧯", "🗑️", "🛢️", "💸", "💵", "💴", "💶", "💷", "💰", "💳", "💎", "⚖️", "🧰", "🔧", "🔨", "⚒️", "🛠️", "⛏️", "🔩", "⚙️", "⚙️", "🧱", "⛓️", "🧲", "🔫", "💣", "🧨", "🔪", "🗡️", "⚔️", "🛡️", "🚬", "⚰️", "⚱️", "🏺", "🔮", "📿", "🧿", "💈", "⚗️", "🔭", "🔬", "🕳️", "💊", "💉", "🩸", "🧬", "🦠", "🌡️", "🧹", "🧺", "🧻", "🚽", "🚰", "🚿", "🛁", "🧼", "🪒", "🧴", "🧷", "🗝️", "🔑", "🔐", "🔒", "🔓", "🔔", "🔕", "📣", "📢", "💬", "💭", "🗯️", "✉️", "📧", "📧", "📧", "📦", "📫", "📪", "📬", "📭", "📮", "🗳️", "📝", "📁", "📂", "📅", "📆", "🗒️", "🗓️", "📖", "📜", "📜", "🔖", "🏷️", "📎", "🖇️", "📐", "📏", "📌", "📍", "✂️", "✒️", "🖋️", "🖊️", "🖌️", "🖍️", "🔍", "🔎", "🛡️", "🏹", "🗡️", "⚔️", "🔫"
-            ))
+            EmojiCategory("Recientes", "🕒", listOf("🎯", "🏀", "🎮", "🎸", "🍕", "🍔", "🍦", "🎬", "🎨", "🎭", "🎤", "❤️", "🔥", "✨", "🌟")),
+            EmojiCategory("Caras", "😀", listOf("😀", "😃", "😄", "😁", "😆", "😅", "😂", "😊", "😇", "🙂", "😉", "😍", "🥰", "😘", "😋")),
+            EmojiCategory("Animales", "🐶", listOf("🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐽", "🐸")),
+            EmojiCategory("Actividad", "⚽", listOf("⚽", "🏀", "🏈", "⚾", "🎾", "🏐", "🏉", "🎱", "🏓", "🏸", "🥅", "🏒", "⛳", "🏹", "🎣"))
         )
     }
 
@@ -365,43 +283,34 @@ fun EmojiPickerDialog(onEmojiSelected: (String) -> Unit, onDismiss: () -> Unit) 
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(28.dp),
-            color = FondoCard,
-            modifier = Modifier.fillMaxWidth().height(550.dp)
+            shape = RoundedCornerShape(32.dp),
+            color = CardDark,
+            modifier = Modifier.fillMaxWidth().height(550.dp),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Elige un Emoji",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
-                    }
+            val localeCode = remember(selectedLanguage) { getLocaleCode(selectedLanguage) }
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(getTranslatedText("Elige un Icono", selectedLanguage), style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.Bold)
+                    IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, null, tint = Color.White) }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Buscar emoji...", color = TextoSecundario) },
+                    placeholder = { Text(getTranslatedText("Buscar...", selectedLanguage), color = GrayText) },
                     modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextoSecundario) },
+                    leadingIcon = { Icon(Icons.Default.Search, null, tint = GrayText) },
                     shape = RoundedCornerShape(16.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedContainerColor = Color.White.copy(alpha = 0.05f),
-                        unfocusedContainerColor = Color.White.copy(alpha = 0.05f)
-                    )
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.03f)
+                    ),
+                    keyboardOptions = KeyboardOptions(hintLocales = LocaleList(Locale(localeCode)))
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -411,23 +320,16 @@ fun EmojiPickerDialog(onEmojiSelected: (String) -> Unit, onDismiss: () -> Unit) 
                         selectedTabIndex = pagerState.currentPage,
                         edgePadding = 0.dp,
                         containerColor = Color.Transparent,
-                        contentColor = Color.White,
+                        contentColor = SamsungGreen,
                         indicator = { tabPositions ->
-                            if (pagerState.currentPage < tabPositions.size) {
-                                TabRowDefaults.SecondaryIndicator(
-                                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                                    color = AcentoVerde
-                                )
-                            }
+                            TabRowDefaults.SecondaryIndicator(modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]), color = SamsungGreen)
                         },
                         divider = {}
                     ) {
                         categories.forEachIndexed { index, category ->
                             Tab(
                                 selected = pagerState.currentPage == index,
-                                onClick = {
-                                    scope.launch { pagerState.animateScrollToPage(index) }
-                                },
+                                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                                 text = { Text(category.icon, fontSize = 20.sp) }
                             )
                         }
@@ -435,20 +337,14 @@ fun EmojiPickerDialog(onEmojiSelected: (String) -> Unit, onDismiss: () -> Unit) 
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.weight(1f)
-                    ) { page ->
+                    HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
                         EmojiGrid(emojis = categories[page].emojis, onEmojiSelected)
                     }
                 } else {
                     val filteredEmojis = remember(searchQuery) {
                         categories.flatMap { it.emojis }.distinct().take(100)
                     }
-                    
-                    Box(modifier = Modifier.weight(1f)) {
-                        EmojiGrid(emojis = filteredEmojis, onEmojiSelected)
-                    }
+                    Box(modifier = Modifier.weight(1f)) { EmojiGrid(emojis = filteredEmojis, onEmojiSelected) }
                 }
             }
         }
@@ -458,21 +354,21 @@ fun EmojiPickerDialog(onEmojiSelected: (String) -> Unit, onDismiss: () -> Unit) 
 @Composable
 fun EmojiGrid(emojis: List<String>, onEmojiSelected: (String) -> Unit) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 45.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        columns = GridCells.Adaptive(minSize = 48.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         items(emojis) { emoji ->
             Box(
                 modifier = Modifier
-                    .size(45.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
                     .background(Color.White.copy(alpha = 0.05f))
                     .clickable { onEmojiSelected(emoji) },
                 contentAlignment = Alignment.Center
             ) {
-                Text(emoji, fontSize = 22.sp)
+                Text(emoji, fontSize = 24.sp)
             }
         }
     }
