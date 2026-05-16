@@ -141,10 +141,11 @@ class MainActivity : ComponentActivity() {
                                     if (hideBarRoutes.none { currentRoute.startsWith(it) }) {
                                         PremiumBottomBar(
                                             selectedLanguage = selectedLanguage,
-                                            onNavigateToSettings = { navController.navigate("settings") },
-                                            onNavigateToHome = { navController.navigate("home") },
-                                            onNavigateToProductivity = { navController.navigate("productivity") },
-                                            onNavigateToCategories = { navController.navigate("listas") },
+                                            onNavigateToHome = { navController.navigate("home") { launchSingleTop = true } },
+                                            onNavigateToCalendar = { navController.navigate("calendar") { launchSingleTop = true } },
+                                            onNavigateToPlus = { navController.navigate("reminders") { launchSingleTop = true } },
+                                            onNavigateToFocus = { navController.navigate("productivity") { launchSingleTop = true } },
+                                            onNavigateToSettings = { navController.navigate("settings") { launchSingleTop = true } },
                                             currentRoute = currentRoute
                                         )
                                     }
@@ -177,7 +178,7 @@ class MainActivity : ComponentActivity() {
                                     composable("notes") {
                                         val id by viewModel.quickNotesId.collectAsState()
                                         if (id != null) {
-                                            NoteListScreen(
+                                            NotesScreen(
                                                 viewModel = viewModel,
                                                 listaId = id!!,
                                                 onBack = { navController.popBackStack() },
@@ -219,6 +220,9 @@ class MainActivity : ComponentActivity() {
                                     }
                                     composable("calendar") {
                                         CalendarScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
+                                    }
+                                    composable("reminders") {
+                                        ReminderScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
                                     }
                                 }
                             }

@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,8 +13,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,21 +22,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.milista.data.ItemType
-import com.example.milista.data.UnifiedItem
 import com.example.milista.ui.theme.*
 import com.example.milista.ui.utils.getTranslatedText
-import com.example.milista.ui.utils.getLocaleCode
-import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
 fun HomeScreen(
@@ -47,120 +45,55 @@ fun HomeScreen(
     onNavigateToListas: () -> Unit,
     onNavigateToNotes: () -> Unit
 ) {
-    val unifiedItems by viewModel.unifiedItems.collectAsState()
     val selectedLanguage by viewModel.selectedLanguage.collectAsState()
-    val recordatorios by viewModel.recordatorios.collectAsState()
-    val alarmas by viewModel.alarmas.collectAsState()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 32.dp)
-    ) {
-        item { GreetingHeaderPremium(selectedLanguage) }
-
-        item {
-            Spacer(modifier = Modifier.height(28.dp))
-            SummaryDashboardCard(unifiedItems, alarmas, selectedLanguage)
+    Scaffold(
+        containerColor = AmoledBlack,
+        bottomBar = {
+            // Se asume que el BottomBar premium ya está manejado en MainActivity
+            // Si no, aquí se implementaría una versión local
         }
-
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
-            MiniHorizontalCalendar(selectedLanguage, onNavigateToCalendar)
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 32.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(getTranslatedText("Próximos eventos", selectedLanguage), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp), color = Color.White)
-                Surface(
-                    onClick = { onNavigateToCalendar() },
-                    color = Color.White.copy(alpha = 0.05f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        getTranslatedText("Ver todo", selectedLanguage) + " >", 
-                        style = MaterialTheme.typography.labelMedium, 
-                        color = GrayText,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
-                }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+            contentPadding = PaddingValues(bottom = 100.dp)
+        ) {
+            // Header Superior
+            item {
+                NoctraHeader(selectedLanguage)
             }
-        }
 
-        item {
-            UpcomingEventsCardContainer(recordatorios, alarmas, selectedLanguage)
-        }
-
-        item {
-            SectionTitleLocal(getTranslatedText("Accesos rápidos", selectedLanguage))
-            QuickAccessRow(
-                selectedLanguage = selectedLanguage,
-                onNavigateToCalendar = onNavigateToCalendar,
-                onNavigateToClock = onNavigateToClock,
-                onNavigateToNotes = onNavigateToNotes,
-                onNavigateToListas = onNavigateToListas,
-                onNavigateToReminders = { onAddReminder("Otro") }
-            )
-        }
-
-        item { Spacer(modifier = Modifier.height(120.dp)) }
-    }
-}
-
-@Composable
-fun SectionTitleLocal(title: String) {
-    Text(text = title, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = Color.White, fontSize = 20.sp, modifier = Modifier.padding(top = 32.dp, bottom = 16.dp))
-}
-
-@Composable
-fun GreetingHeaderPremium(language: String) {
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    val greeting = when (hour) {
-        in 5..11 -> "¡Buenos días!"
-        in 12..19 -> "¡Buenas tardes!"
-        else -> "¡Buenas noches!"
-    }
-    val dateFormat = SimpleDateFormat("EEEE, d 'de' MMMM", Locale(getLocaleCode(language)))
-    val dateStr = dateFormat.format(Date()).replaceFirstChar { it.uppercase() }
-
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = getTranslatedText(greeting, language), style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold, fontSize = 32.sp, color = Color.White))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("👋", fontSize = 28.sp)
+            // Card Principal de Productividad
+            item {
+                ProductivityMainCard(selectedLanguage)
             }
-            Text(text = dateStr, style = MaterialTheme.typography.titleMedium, color = GrayText.copy(0.7f), modifier = Modifier.padding(top = 4.dp))
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            HeaderIconButton(Icons.Default.Search)
-            Spacer(modifier = Modifier.width(12.dp))
-            HeaderIconButton(Icons.Default.Notifications, hasBadge = true)
-        }
-    }
-}
 
-@Composable
-fun HeaderIconButton(icon: ImageVector, hasBadge: Boolean = false) {
-    Surface(
-        onClick = {},
-        shape = CircleShape,
-        color = Color.White.copy(alpha = 0.06f),
-        modifier = Modifier.size(46.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp))
-            if (hasBadge) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(SamsungGreen, CircleShape)
-                        .align(Alignment.TopEnd)
-                        .offset(x = (-4).dp, y = 4.dp)
+            // Sección Calendario + Eventos
+            item {
+                CalendarAndNextEventRow(onNavigateToCalendar, selectedLanguage)
+            }
+
+            // Notas Rápidas
+            item {
+                QuickNotesSection(onNavigateToNotes, selectedLanguage)
+            }
+
+            // Resumen del día
+            item {
+                DaySummarySection(selectedLanguage)
+            }
+
+            // Accesos Rápidos
+            item {
+                QuickActionsSection(
+                    onAddNote = { onNavigateToNotes() },
+                    onAddReminder = { onAddReminder("Otro") },
+                    onAddList = { onNavigateToListas() },
+                    onFocus = { /* onNavigateToFocus? */ },
+                    selectedLanguage = selectedLanguage
                 )
             }
         }
@@ -168,243 +101,394 @@ fun HeaderIconButton(icon: ImageVector, hasBadge: Boolean = false) {
 }
 
 @Composable
-fun SummaryDashboardCard(items: List<UnifiedItem>, alarmas: List<com.example.milista.data.Alarma>, language: String) {
-    val pendingTasks = items.count { it.type == ItemType.TASK && !it.isCompleted }
-    val nextAlarm = alarmas.filter { it.activa }.minByOrNull { it.hora * 60 + it.minuto }
-    val todayEvents = items.count { 
-        val cal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
-        val today = Calendar.getInstance()
-        cal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) && it.type == ItemType.EVENT
-    }
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
-        color = Color.White.copy(alpha = 0.04f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f))
+fun NoctraHeader(language: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            HeaderCircleButton(Icons.Default.Menu)
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "Noctra ✨",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                        letterSpacing = (-1).sp
+                    )
+                )
+                Text(
+                    text = getTranslatedText("Organiza tu día. Maximiza tu potencial.", language),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = GrayText.copy(alpha = 0.7f)
+                )
+            }
+        }
+        Row {
+            HeaderCircleButton(Icons.Default.Search)
+            Spacer(modifier = Modifier.width(12.dp))
+            Box {
+                HeaderCircleButton(Icons.Default.Notifications)
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .background(NeonGreen, CircleShape)
+                        .align(Alignment.TopEnd)
+                        .border(2.dp, AmoledBlack, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("3", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AmoledBlack)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HeaderCircleButton(icon: ImageVector) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.05f))
+            .border(1.dp, BorderGlow, CircleShape)
+            .clickable { },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, null, tint = Color.White, modifier = Modifier.size(22.dp))
+    }
+}
+
+@Composable
+fun ProductivityMainCard(language: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .shadow(20.dp, RoundedCornerShape(28.dp), spotColor = NeonGreen.copy(alpha = 0.2f)),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = CardDark),
+        border = BorderStroke(1.dp, BorderGlow)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(24.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "¡Buenas noches, Juan! 🌙",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White
+                )
+                Text(
+                    text = getTranslatedText("Estás haciendo un gran trabajo hoy.", language),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = GrayText
+                )
+            }
+
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 16.dp)) {
+                CircularProgressIndicator(
+                    progress = { 0.78f },
+                    modifier = Modifier.size(64.dp),
+                    color = NeonGreen,
+                    strokeWidth = 6.dp,
+                    trackColor = Color.White.copy(alpha = 0.05f)
+                )
+                Text(
+                    "78%",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = NeonGreen
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text("Productividad", fontSize = 12.sp, color = NeonGreen, fontWeight = FontWeight.Bold)
+                Text("Hoy", fontSize = 11.sp, color = GrayText)
+                Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = SamsungGreen, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(getTranslatedText("Resumen del día", language), style = MaterialTheme.typography.labelLarge, color = Color.White.copy(0.9f), fontWeight = FontWeight.SemiBold)
+                    Text("Vas por buen camino", fontSize = 10.sp, color = NeonGreen)
+                    Icon(Icons.Default.ArrowUpward, null, tint = NeonGreen, modifier = Modifier.size(12.dp))
                 }
-                Icon(Icons.Default.MoreHoriz, contentDescription = null, tint = GrayText.copy(0.4f))
-            }
-            Spacer(modifier = Modifier.height(28.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                SummaryDashboardItem(Icons.Default.CheckCircle, pendingTasks.toString(), getTranslatedText("Pendientes", language), SamsungBlue)
-                Box(modifier = Modifier.width(1.dp).height(40.dp).background(Color.White.copy(alpha = 0.05f)).align(Alignment.CenterVertically))
-                SummaryDashboardItem(Icons.Default.Alarm, nextAlarm?.let { "1" } ?: "0", getTranslatedText("Alarma", language), SamsungRed)
-                Box(modifier = Modifier.width(1.dp).height(40.dp).background(Color.White.copy(alpha = 0.05f)).align(Alignment.CenterVertically))
-                SummaryDashboardItem(Icons.Default.CalendarToday, todayEvents.toString(), getTranslatedText("Eventos hoy", language), SamsungGreen)
             }
         }
     }
 }
 
 @Composable
-fun SummaryDashboardItem(icon: ImageVector, value: String, label: String, color: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.size(42.dp).background(color.copy(alpha = 0.15f), CircleShape), contentAlignment = Alignment.Center) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(value, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-        Text(label, fontSize = 11.sp, color = GrayText.copy(0.6f), fontWeight = FontWeight.Medium)
-    }
-}
-
-@Composable
-fun MiniHorizontalCalendar(language: String, onNavigate: () -> Unit) {
-    val cal = Calendar.getInstance()
-    val monthName = SimpleDateFormat("MMMM yyyy", Locale(getLocaleCode(language))).format(cal.time).replaceFirstChar { it.uppercase() }
-    
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
-        color = Color.White.copy(alpha = 0.04f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f))
+fun CalendarAndNextEventRow(onNavigate: () -> Unit, language: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(monthName, style = MaterialTheme.typography.titleMedium, color = Color.White, fontWeight = FontWeight.Bold)
-                IconButton(onClick = onNavigate, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = GrayText, modifier = Modifier.size(20.dp))
+        // Columna Izquierda: Calendario
+        Card(
+            modifier = Modifier
+                .weight(1.3f)
+                .fillMaxHeight(),
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = CardDark),
+            border = BorderStroke(1.dp, BorderGlow)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Mayo 2025", fontWeight = FontWeight.Bold, color = Color.White)
+                    Row {
+                        Icon(Icons.Default.ChevronLeft, null, tint = GrayText, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.ChevronRight, null, tint = GrayText, modifier = Modifier.size(20.dp))
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                val days = listOf("L", "M", "M", "J", "V", "S", "D")
-                val today = cal.get(Calendar.DAY_OF_MONTH)
-                val startDay = today - cal.get(Calendar.DAY_OF_WEEK) + 2 
-                
-                days.forEachIndexed { index, d ->
-                    val dayNum = startDay + index
-                    val isToday = dayNum == today
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(d, fontSize = 11.sp, color = GrayText.copy(0.5f), fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(if (isToday) SamsungGreen else Color.Transparent)
-                                .clickable { },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(dayNum.toString(), fontSize = 15.sp, color = if (isToday) Color.Black else Color.White, fontWeight = FontWeight.Bold)
-                                if (isToday) {
-                                    Box(modifier = Modifier.size(3.dp).background(Color.Black, CircleShape).offset(y = 2.dp))
-                                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    val days = listOf("12" to "LUN", "13" to "MAR", "14" to "MIÉ", "15" to "JUE", "16" to "VIE", "17" to "SÁB", "18" to "DOM")
+                    days.forEach { (num, day) ->
+                        val isSelected = num == "14"
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(day, fontSize = 9.sp, color = GrayText)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(if (isSelected) NeonGreen else Color.Transparent)
+                                    .border(1.dp, if (isSelected) NeonGreen else Color.Transparent, RoundedCornerShape(10.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(num, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (isSelected) AmoledBlack else Color.White)
                             }
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+                EventMiniItem(Color(0xFFB4F16C), "Diseño UI Noctra", "10:00 AM - 12:00 PM", "Trabajo")
+                Spacer(modifier = Modifier.height(12.dp))
+                EventMiniItem(Color(0xFFA78BFA), "Reunión con equipo", "2:30 PM - 3:30 PM", "Trabajo")
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    "Ver calendario completo >",
+                    color = NeonGreen,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onNavigate() }
+                )
             }
         }
-    }
-}
 
-@Composable
-fun UpcomingEventsCardContainer(recordatorios: List<com.example.milista.data.Recordatorio>, alarmas: List<com.example.milista.data.Alarma>, language: String) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
-        color = Color.White.copy(alpha = 0.04f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f))
-    ) {
-        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            if (recordatorios.isEmpty() && alarmas.none { it.activa }) {
-                Box(modifier = Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) {
-                    Text(getTranslatedText("Nada programado para hoy", language), color = GrayText.copy(0.5f), style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                recordatorios.take(4).forEachIndexed { index, rec ->
-                    UpcomingEventItemPremium(rec, language)
-                    if (index < 3 && index < recordatorios.size - 1) {
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color.White.copy(alpha = 0.05f))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun UpcomingEventItemPremium(reminder: com.example.milista.data.Recordatorio, language: String) {
-    val isOtro = reminder.tipo == "Otro"
-    val color = if (isOtro && reminder.colorCustom != null) Color(reminder.colorCustom) else SamsungBlue
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.size(48.dp).background(color.copy(alpha = 0.15f), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
-            Icon(Icons.Default.Event, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(reminder.fecha)), fontSize = 12.sp, color = color.copy(alpha = 0.8f), fontWeight = FontWeight.Bold)
-            Text(
-                text = if (isOtro) reminder.nombreCustom ?: "Evento" else getTranslatedText(reminder.tipo, language), 
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 17.sp), 
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(text = if (isOtro) "Personal" else getTranslatedText(reminder.tipo, language), fontSize = 13.sp, color = GrayText.copy(0.6f))
-        }
-        Box(modifier = Modifier.size(8.dp).background(color, CircleShape))
-    }
-}
-
-@Composable
-fun QuickAccessRow(
-    selectedLanguage: String,
-    onNavigateToCalendar: () -> Unit,
-    onNavigateToClock: () -> Unit,
-    onNavigateToNotes: () -> Unit,
-    onNavigateToListas: () -> Unit,
-    onNavigateToReminders: () -> Unit
-) {
-    val items = listOf(
-        QuickAccessItemData(getTranslatedText("Calendario", selectedLanguage), Icons.Default.CalendarMonth, SamsungBlue, onNavigateToCalendar),
-        QuickAccessItemData(getTranslatedText("Reloj", selectedLanguage), Icons.Default.AccessTime, SamsungRed, onNavigateToClock),
-        QuickAccessItemData(getTranslatedText("Notas", selectedLanguage), Icons.Default.Description, SamsungOrange, onNavigateToNotes),
-        QuickAccessItemData(getTranslatedText("Listas", selectedLanguage), Icons.AutoMirrored.Filled.List, SamsungGreen, onNavigateToListas),
-        QuickAccessItemData(getTranslatedText("Avisos", selectedLanguage), Icons.Default.NotificationsActive, SamsungPurple, onNavigateToReminders)
-    )
-
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        items(items) { item ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(76.dp)) {
-                Surface(
-                    onClick = item.onClick,
-                    shape = RoundedCornerShape(24.dp),
-                    color = Color.White.copy(alpha = 0.05f),
-                    modifier = Modifier.size(76.dp),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+        // Columna Derecha: Próximo Evento
+        Card(
+            modifier = Modifier
+                .weight(0.7f)
+                .fillMaxHeight(),
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1225)), // Morado oscuro
+            border = BorderStroke(1.dp, Purple.copy(alpha = 0.3f))
+        ) {
+            Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Próximo evento", color = Purple, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(Purple.copy(alpha = 0.1f), CircleShape),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(item.icon, contentDescription = null, tint = item.color, modifier = Modifier.size(28.dp))
-                    }
+                    Icon(Icons.Default.CalendarToday, null, tint = Purple)
                 }
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(item.label, color = GrayText, fontSize = 11.sp, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("Reunión con equipo", fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center, fontSize = 13.sp)
+                Text("Mañana • 2:30 PM", fontSize = 11.sp, color = GrayText)
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CountdownUnit("16", "Hrs")
+                    CountdownUnit("48", "Min")
+                }
             }
         }
     }
 }
 
-data class QuickAccessItemData(val label: String, val icon: ImageVector, val color: Color, val onClick: () -> Unit)
+@Composable
+fun EventMiniItem(color: Color, title: String, time: String, category: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.width(3.dp).height(24.dp).background(color, RoundedCornerShape(2.dp)))
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color.White)
+            Text(time, fontSize = 10.sp, color = GrayText)
+        }
+        Box(
+            modifier = Modifier.background(color.copy(alpha = 0.1f), RoundedCornerShape(4.dp)).padding(horizontal = 6.dp, vertical = 2.dp)
+        ) {
+            Text(category, fontSize = 8.sp, color = color, fontWeight = FontWeight.Bold)
+        }
+    }
+}
 
 @Composable
-fun PremiumBottomBar(
-    selectedLanguage: String,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToHome: () -> Unit,
-    onNavigateToProductivity: () -> Unit,
-    onNavigateToCategories: () -> Unit,
-    currentRoute: String
-) {
-    Surface(
+fun CountdownUnit(value: String, unit: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+        Text(unit, fontSize = 8.sp, color = GrayText)
+    }
+}
+
+@Composable
+fun QuickNotesSection(onNavigate: () -> Unit, language: String) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 20.dp)
-            .height(76.dp),
-        color = Color(0xFF141A22).copy(alpha = 0.9f),
-        shape = RoundedCornerShape(38.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.06f))
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = CardDark),
+        border = BorderStroke(1.dp, BorderGlow)
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BottomNavItemPremium(Icons.Default.Home, getTranslatedText("Inicio", selectedLanguage), currentRoute == "home", onClick = onNavigateToHome)
-            BottomNavItemPremium(Icons.Default.BarChart, getTranslatedText("Productividad", selectedLanguage), currentRoute == "productivity", onClick = onNavigateToProductivity)
-            BottomNavItemPremium(Icons.Default.GridView, getTranslatedText("Apps", selectedLanguage), currentRoute == "listas", onClick = onNavigateToCategories)
-            BottomNavItemPremium(Icons.Default.Settings, getTranslatedText("Ajustes", selectedLanguage), currentRoute == "settings", onClick = onNavigateToSettings)
+        Column(modifier = Modifier.padding(24.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Notas rápidas", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
+                HeaderCircleButton(Icons.Default.Add)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            QuickNoteItem(Icons.Default.Description, "Ideas para el nuevo diseño", "Hoy, 8:47 PM")
+            Spacer(modifier = Modifier.height(12.dp))
+            QuickNoteItem(Icons.Default.Checklist, "Comprar materiales", "Hoy, 6:12 PM")
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "Ver todas >",
+                color = NeonGreen,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onNavigate() }
+            )
         }
     }
 }
 
 @Composable
-fun BottomNavItemPremium(icon: ImageVector, label: String, isSelected: Boolean, onClick: () -> Unit = {}) {
-    val color = if (isSelected) SamsungGreen else GrayText.copy(0.4f)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clip(RoundedCornerShape(16.dp)).clickable { onClick() }.padding(8.dp)
+fun QuickNoteItem(icon: ImageVector, title: String, time: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White.copy(alpha = 0.03f), RoundedCornerShape(16.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(26.dp))
-        if (isSelected) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Box(modifier = Modifier.size(4.dp).background(SamsungGreen, CircleShape))
+        Icon(icon, null, tint = NeonGreen, modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color.White)
+            Text(time, fontSize = 10.sp, color = GrayText)
         }
     }
 }
+
+@Composable
+fun DaySummarySection(language: String) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Text("Resumen del día", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            SummaryCard(Icons.Default.CheckCircle, "8", "Tareas", NeonGreen, "4 completadas", Modifier.weight(1f))
+            SummaryCard(Icons.Default.Timer, "3h 45m", "Enfoque", Purple, "Tiempo total", Modifier.weight(1f))
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            SummaryCard(Icons.Default.Flag, "5/8", "Objetivos", Orange, "En progreso", Modifier.weight(1f))
+            SummaryCard(Icons.Default.Whatshot, "264", "Racha", Blue, "Días seguidos", Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+fun SummaryCard(icon: ImageVector, value: String, label: String, color: Color, subtext: String, modifier: Modifier) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = CardDark),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.2f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Icon(icon, null, tint = color, modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(value, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+            Text(label, fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
+            Text(subtext, fontSize = 10.sp, color = GrayText)
+        }
+    }
+}
+
+@Composable
+fun QuickActionsSection(onAddNote: () -> Unit, onAddReminder: () -> Unit, onAddList: () -> Unit, onFocus: () -> Unit, selectedLanguage: String) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Accesos rápidos", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Tune, null, tint = NeonGreen, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Personalizar", color = NeonGreen, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            QuickActionButton(Icons.Outlined.NoteAdd, "Nueva nota", Modifier.weight(1f), onAddNote)
+            QuickActionButton(Icons.Outlined.Notifications, "Nuevo recordatorio", Modifier.weight(1f), onAddReminder)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            QuickActionButton(Icons.Outlined.ShoppingCart, "Nueva lista", Modifier.weight(1f), onAddList)
+            QuickActionButton(Icons.Outlined.Adjust, "Bloque de enfoque", Modifier.weight(1f), onFocus)
+        }
+    }
+}
+
+@Composable
+fun QuickActionButton(icon: ImageVector, label: String, modifier: Modifier, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(22.dp),
+        color = CardDark,
+        border = BorderStroke(1.dp, BorderGlow)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(icon, null, tint = Color.White, modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(label, fontSize = 11.sp, color = Color.White, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+// Bottom Bar Premium logic removed as it's now in NavigationUtils.kt
+
+// Bottom Bar Premium logic remains in MainActivity but we define the look here if needed.

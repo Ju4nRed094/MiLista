@@ -2,16 +2,26 @@ package com.example.milista.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Paleta Premium MiLista (Samsung One UI Style)
-val SamsungGreen = Color(0xFF67E36C)
-val SamsungBlue = Color(0xFF3E78FF)
+// Paleta Premium Noctra (AMOLED One UI Style)
+val AmoledBlack = Color(0xFF050505)
+val NeonGreen = Color(0xFF7CFF4F)
+val SoftGreen = Color(0xFF5BE23D)
+val CardDark = Color(0xFF101114)
+val BorderGlow = Color(0x332EFF7A)
+
+val Purple = Color(0xFF9D4DFF)
+val Orange = Color(0xFFFF9D2F)
+val Blue = Color(0xFF4DA3FF)
+
+// Alias para compatibilidad y estilos anteriores
+val SamsungGreen = NeonGreen
+val SamsungBlue = Blue
 val SamsungRed = Color(0xFFF14141)
-val SamsungPurple = Color(0xFF818CF8)
-val SamsungOrange = Color(0xFFF97316)
+val SamsungPurple = Purple
+val SamsungOrange = Orange
 
 // Colores de Fondo y Superficie
-val BackgroundDark = Color(0xFF070B11)
-val CardDark = Color(0xFF141A22)
+val BackgroundDark = AmoledBlack
 val SoftWhite = Color(0xFFF5F5F5)
 val GrayText = Color(0xFF9AA0A6)
 
