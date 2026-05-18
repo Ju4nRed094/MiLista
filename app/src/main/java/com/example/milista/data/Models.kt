@@ -51,6 +51,10 @@ data class Recordatorio(
     val tipo: String,    // Cumpleaños, Doctor, etc. o "Otro"
     val fecha: Long,     // Timestamp
     val estado: Boolean = true,
+    val description: String = "",
+    val repeatMode: String = "No se repite", // Diario, Semanal, Mensual, No se repite
+    val isFavorite: Boolean = false,
+    val isCompleted: Boolean = false,
     // Campos para personalización si el tipo es "Otro"
     val nombreCustom: String? = null,
     val emojiCustom: String? = null,

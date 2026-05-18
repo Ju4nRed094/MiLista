@@ -36,7 +36,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.milista.receiver.AlarmReceiver
 import com.example.milista.ui.*
-import com.example.milista.ui.theme.MiListaTheme
+import com.example.milista.ui.theme.NoctraTheme
 import com.example.milista.ui.theme.BackgroundDark
 import com.example.milista.ui.utils.getLocaleCode
 import com.example.milista.ui.utils.getTranslatedText
@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
             val selectedFontSize by viewModel.selectedFontSize.collectAsState()
             val isApplyingChanges by viewModel.isApplyingChanges.collectAsState()
             
-            MiListaTheme(
+            NoctraTheme(
                 selectedFontFamily = selectedFont.fontFamily,
                 selectedTheme = selectedTheme,
                 selectedFontSize = selectedFontSize
@@ -141,11 +141,11 @@ class MainActivity : ComponentActivity() {
                                     if (hideBarRoutes.none { currentRoute.startsWith(it) }) {
                                         PremiumBottomBar(
                                             selectedLanguage = selectedLanguage,
-                                            onNavigateToHome = { navController.navigate("home") { launchSingleTop = true } },
                                             onNavigateToCalendar = { navController.navigate("calendar") { launchSingleTop = true } },
-                                            onNavigateToPlus = { navController.navigate("reminders") { launchSingleTop = true } },
-                                            onNavigateToFocus = { navController.navigate("productivity") { launchSingleTop = true } },
-                                            onNavigateToSettings = { navController.navigate("settings") { launchSingleTop = true } },
+                                            onNavigateToClock = { navController.navigate("clock") { launchSingleTop = true } },
+                                            onNavigateToNotes = { navController.navigate("notes") { launchSingleTop = true } },
+                                            onNavigateToReminders = { navController.navigate("reminders") { launchSingleTop = true } },
+                                            onNavigateToLists = { navController.navigate("listas") { launchSingleTop = true } },
                                             currentRoute = currentRoute
                                         )
                                     }

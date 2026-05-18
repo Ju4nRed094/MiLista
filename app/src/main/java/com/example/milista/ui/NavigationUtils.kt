@@ -8,18 +8,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.milista.ui.theme.*
@@ -28,81 +30,97 @@ import com.example.milista.ui.utils.getTranslatedText
 @Composable
 fun PremiumBottomBar(
     selectedLanguage: String,
-    onNavigateToHome: () -> Unit,
     onNavigateToCalendar: () -> Unit,
-    onNavigateToPlus: () -> Unit,
-    onNavigateToFocus: () -> Unit,
-    onNavigateToSettings: () -> Unit,
+    onNavigateToClock: () -> Unit,
+    onNavigateToNotes: () -> Unit,
+    onNavigateToReminders: () -> Unit,
+    onNavigateToLists: () -> Unit,
     currentRoute: String
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 24.dp),
+            .padding(horizontal = 16.dp, vertical = 20.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
-        // Floating Bar Background
+        // Floating Glassmorphism Bar
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(72.dp)
-                .shadow(24.dp, RoundedCornerShape(32.dp), spotColor = NeonGreen.copy(alpha = 0.3f)),
-            shape = RoundedCornerShape(32.dp),
-            color = CardDark.copy(alpha = 0.85f),
+                .height(76.dp)
+                .shadow(32.dp, RoundedCornerShape(38.dp), spotColor = NeonGreen.copy(alpha = 0.25f)),
+            shape = RoundedCornerShape(38.dp),
+            color = Color(0xFF0D0D0D).copy(alpha = 0.92f), // AMOLED Dark Glass
             border = BorderStroke(1.dp, BorderGlow)
         ) {
             Row(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                BottomNavItem(Icons.Default.Home, getTranslatedText("Inicio", selectedLanguage), currentRoute == "home", onNavigateToHome)
-                BottomNavItem(Icons.Default.CalendarToday, getTranslatedText("Calendario", selectedLanguage), currentRoute == "calendar", onNavigateToCalendar)
-                
-                // Espacio para el FAB central
-                Spacer(modifier = Modifier.width(64.dp))
-
-                BottomNavItem(Icons.Default.TrackChanges, getTranslatedText("Enfoque", selectedLanguage), currentRoute == "productivity", onNavigateToFocus)
-                BottomNavItem(Icons.Default.Settings, getTranslatedText("Ajustes", selectedLanguage), currentRoute == "settings", onNavigateToSettings)
+                BottomNavItem(
+                    icon = Icons.Rounded.CalendarMonth,
+                    label = getTranslatedText("Calendario", selectedLanguage),
+                    isSelected = currentRoute == "calendar",
+                    onClick = onNavigateToCalendar
+                )
+                BottomNavItem(
+                    icon = Icons.Rounded.Schedule,
+                    label = getTranslatedText("Reloj", selectedLanguage),
+                    isSelected = currentRoute == "clock",
+                    onClick = onNavigateToClock
+                )
+                BottomNavItem(
+                    icon = Icons.Rounded.Description,
+                    label = getTranslatedText("Notas", selectedLanguage),
+                    isSelected = currentRoute == "notes",
+                    onClick = onNavigateToNotes
+                )
+                BottomNavItem(
+                    icon = Icons.Rounded.Notifications,
+                    label = getTranslatedText("Recordatorios", selectedLanguage),
+                    isSelected = currentRoute == "reminders",
+                    onClick = onNavigateToReminders
+                )
+                BottomNavItem(
+                    icon = Icons.Rounded.Checklist,
+                    label = getTranslatedText("Listas", selectedLanguage),
+                    isSelected = currentRoute == "listas",
+                    onClick = onNavigateToLists
+                )
             }
-        }
-
-        // Prominent Central FAB
-        FloatingActionButton(
-            onClick = onNavigateToPlus,
-            shape = CircleShape,
-            containerColor = NeonGreen,
-            contentColor = AmoledBlack,
-            modifier = Modifier
-                .offset(y = (-32).dp)
-                .size(64.dp)
-                .shadow(16.dp, CircleShape, spotColor = NeonGreen),
-            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp, pressedElevation = 0.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Añadir", modifier = Modifier.size(32.dp))
         }
     }
 }
 
 @Composable
 fun BottomNavItem(icon: ImageVector, label: String, isSelected: Boolean, onClick: () -> Unit) {
-    val color = if (isSelected) NeonGreen else GrayText.copy(alpha = 0.5f)
+    val color = if (isSelected) NeonGreen else GrayText.copy(alpha = 0.4f)
     val scale by animateFloatAsState(if (isSelected) 1.15f else 1.0f)
+    val iconSize by animateFloatAsState(if (isSelected) 26f else 24f)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .clip(CircleShape)
             .clickable { onClick() }
-            .padding(4.dp)
+            .padding(vertical = 4.dp, horizontal = 8.dp)
             .graphicsLayer(scaleX = scale, scaleY = scale)
     ) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(24.dp))
+        Icon(
+            icon, 
+            null, 
+            tint = color, 
+            modifier = Modifier.size(iconSize.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = label,
             fontSize = 9.sp,
             color = color,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         if (isSelected) {
             Box(
@@ -110,6 +128,7 @@ fun BottomNavItem(icon: ImageVector, label: String, isSelected: Boolean, onClick
                     .padding(top = 2.dp)
                     .size(3.dp)
                     .background(NeonGreen, CircleShape)
+                    .shadow(4.dp, CircleShape, spotColor = NeonGreen)
             )
         }
     }

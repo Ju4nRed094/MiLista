@@ -3,10 +3,10 @@ package com.example.milista.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Paleta Premium Noctra (AMOLED One UI Style)
-val AmoledBlack = Color(0xFF050505)
-val NeonGreen = Color(0xFF7CFF4F)
-val SoftGreen = Color(0xFF5BE23D)
-val CardDark = Color(0xFF101114)
+val AmoledBlack = Color(0xFF000000)
+val NeonGreen = Color(0xFF8CFF2F)
+val CardDark = Color(0xFF0D0D0D)
+val DarkGray = Color(0xFF111111)
 val BorderGlow = Color(0x332EFF7A)
 
 val Purple = Color(0xFF9D4DFF)

@@ -41,7 +41,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun MiListaTheme(
+fun NoctraTheme(
     selectedFontFamily: FontFamily = FontFamily.Default,
     selectedTheme: String = "Oscuro",
     selectedFontSize: Float = 16f,
