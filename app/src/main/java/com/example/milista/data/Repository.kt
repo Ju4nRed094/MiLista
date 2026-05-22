@@ -21,6 +21,7 @@ class MiListaRepository(
     fun obtenerTodosLosRecordatorios(): Flow<List<Recordatorio>> = recordatorioDao.obtenerTodos()
     fun obtenerTareasPorLista(listaId: Int): Flow<List<Tarea>> = tareaDao.obtenerPorLista(listaId)
     fun obtenerTodasLasAlarmas(): Flow<List<Alarma>> = alarmaDao.obtenerTodas()
+    fun obtenerTodasLasTareas(): Flow<List<Tarea>> = tareaDao.obtenerTodas()
 
     suspend fun insertarLista(lista: Lista): Long = listaDao.insertar(lista)
     suspend fun actualizarLista(lista: Lista) = listaDao.actualizar(lista)

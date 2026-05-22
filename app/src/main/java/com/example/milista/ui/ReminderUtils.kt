@@ -31,3 +31,14 @@ object ReminderConstants {
         return types.find { it.name == name } ?: types.last()
     }
 }
+
+fun getEmojiLocal(tipo: String): String {
+    return when(tipo) {
+        "Trabajo" -> "💼"
+        "Salud" -> "🏥"
+        "Estudio" -> "📚"
+        "Cumpleaños" -> "🎂"
+        "Viaje" -> "✈️"
+        else -> "🔔"
+    }
+}

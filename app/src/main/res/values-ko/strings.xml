@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Noctra</string>
+    <string name="home">홈</string>
+    <string name="calendar">캘린더</string>
+    <string name="clock">시계</string>
+    <string name="notes">노트</string>
+    <string name="settings">설정</string>
+    <string name="reminders">리마인더</string>
+    <string name="focus">집중</string>
+    <string name="lists">리스트</string>
+
+    <string name="good_morning">좋은 아침입니다</string>
+    <string name="good_afternoon">안녕하세요</string>
+    <string name="good_evening">좋은 저녁입니다</string>
+
+    <string name="organize_day">하루를 정리하세요.</string>
+    <string name="maximize_potential">잠재력을</string>
+    <string name="your_potential"> 극대화하세요.</string>
+
+    <string name="productivity">생산성</string>
+    <string name="today">오늘</string>
+    <string name="on_track">잘하고 계시네요</string>
+
+    <string name="next_event">다음 일정</string>
+    <string name="no_events">일정이 없습니다</string>
+    <string name="see_full_calendar">전체 캘린더 보기 ></string>
+
+    <string name="quick_notes">빠른 노트</string>
+    <string name="recent_notes">최근 노트</string>
+    <string name="no_recent_notes">최근 노트가 없습니다</string>
+    <string name="see_all">모두 보기 ></string>
+
+    <string name="day_summary">오늘의 요약</string>
+    <string name="tasks">할 일</string>
+    <string name="completed">완료</string>
+    <string name="goals">목표</string>
+    <string name="status_in_progress">진행 중</string>
+    <string name="streak">연속 기록</string>
+    <string name="days_followed">연속 일수</string>
+
+    <string name="quick_access">빠른 실행</string>
+    <string name="customize">사용자 정의</string>
+    <string name="new_note">새 노트</string>
+    <string name="new_reminder">새 리마인더</string>
+    <string name="new_list">새 리스트</string>
+    <string name="focus_block">집중 시간</string>
+
+    <string name="appearance">테마 및 스타일</string>
+    <string name="app_theme">앱 테마</string>
+    <string name="font_type">글꼴 종류</string>
+    <string name="font_size">글꼴 크기</string>
+    <string name="general">일반</string>
+    <string name="language">언어</string>
+    <string name="notifications">알림</string>
+    <string name="sound_vibration">소리 및 진동 알림</string>
+    <string name="do_not_disturb">방해 금지</string>
+    <string name="silence_notifications">일시적으로 알림 끄기</string>
+    <string name="privacy">개인정보 보호</string>
+    <string name="manage_privacy">개인정보 및 데이터 관리</string>
+    <string name="backup">백업</string>
+    <string name="sync_data">데이터 동기화</string>
+    <string name="delete_data">데이터 삭제</string>
+    <string name="delete_all_data">모든 앱 데이터 삭제</string>
+    <string name="more">더 보기</string>
+    <string name="help_support">도움말 및 지원</string>
+    <string name="help_center">고객 센터 및 문의</string>
+    <string name="about_noctra">Noctra 정보</string>
+    <string name="version">버전 1.0.0</string>
+
+    <string name="dark">다크</string>
+    <string name="light">라이트</string>
+    <string name="system">시스템 설정</string>
+
+    <string name="upcoming">예정</string>
+    <string name="completed_reminders">완료됨</string>
+    <string name="no_pending_reminders">대기 중인 리마인더가 없습니다 ✨</string>
+    <string name="smart_reminders">지능형 리마인더</string>
+    <string name="important_reminders_today">오늘 %1$d개의 중요한 리마인더가 있습니다</string>
+    <string name="keep_productivity">생산성을 유지하세요</string>
+    <string name="activate_smart_notifications">스마트 알림 활성화</string>
+    <string name="never_forget_anything">중요한 것을 잊지 마세요</string>
+    <string name="organize_your_day_never_forget">하루를 정리하고 </string>
+    <string name="important">중요한 것</string>
+
+    <string name="applying_changes">변경 사항 적용 중...</string>
+    <string name="close">닫기</string>
+    <string name="create">만들기</string>
+    <string name="cancel">취소</string>
+    <string name="name">이름</string>
+    <string name="save_event">일정 저장</string>
+    <string name="select_date">날짜 선택</string>
+    <string name="select_time">시간 선택</string>
+</resources>

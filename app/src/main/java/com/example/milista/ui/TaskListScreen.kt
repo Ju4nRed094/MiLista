@@ -17,14 +17,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.milista.R
 import com.example.milista.data.Tarea
 import com.example.milista.ui.theme.*
-import com.example.milista.ui.utils.getTranslatedText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +34,6 @@ fun TaskListScreen(
     listaId: Int,
     onBack: () -> Unit
 ) {
-    val selectedLanguage by viewModel.selectedLanguage.collectAsState()
     val tareas by viewModel.repository.obtenerTareasPorLista(listaId).collectAsState(initial = emptyList())
     val listas by viewModel.listas.collectAsState()
     val currentLista = listas.find { it.id == listaId }
@@ -53,13 +53,13 @@ fun TaskListScreen(
                     title = {
                         Column {
                             Text(
-                                currentLista?.nombre ?: getTranslatedText("Lista", selectedLanguage),
+                                currentLista?.nombre ?: stringResource(R.string.lists),
                                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, fontSize = 32.sp),
                                 color = Color.White
                             )
                             if (totalTasks > 0) {
                                 Text(
-                                    text = "$completedTasks/$totalTasks " + getTranslatedText("completadas", selectedLanguage),
+                                    text = "$completedTasks/$totalTasks " + stringResource(R.string.completed),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = GrayText
                                 )
@@ -104,7 +104,7 @@ fun TaskListScreen(
 
                 if (tareas.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(getTranslatedText("No hay tareas pendientes", selectedLanguage), color = GrayText.copy(alpha = 0.5f))
+                        Text(stringResource(R.string.no_pending_reminders), color = GrayText.copy(alpha = 0.5f))
                     }
                 } else {
                     LazyColumn(
@@ -130,7 +130,7 @@ fun TaskListScreen(
                 onDismissRequest = { showAddTaskDialog = false },
                 containerColor = CardDark,
                 shape = RoundedCornerShape(28.dp),
-                title = { Text(getTranslatedText("Nueva Tarea", selectedLanguage), color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.new_note), color = Color.White, fontWeight = FontWeight.Bold) },
                 text = {
                     OutlinedTextField(
                         value = newTaskTitle,
@@ -156,7 +156,7 @@ fun TaskListScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = SamsungGreen),
                         enabled = newTaskTitle.isNotBlank()
                     ) {
-                        Text(getTranslatedText("Añadir", selectedLanguage), color = Color.Black)
+                        Text(stringResource(R.string.finalize), color = Color.Black)
                     }
                 }
             )

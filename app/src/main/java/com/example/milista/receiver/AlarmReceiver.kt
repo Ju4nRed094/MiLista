@@ -42,6 +42,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Notificaciones para las alarmas configuradas"
+                // No establecemos el sonido aquí para poder controlarlo dinámicamente en el builder
                 setSound(null, null)
                 enableVibration(true)
             }

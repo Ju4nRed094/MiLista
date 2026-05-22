@@ -59,7 +59,9 @@ data class Recordatorio(
     val nombreCustom: String? = null,
     val emojiCustom: String? = null,
     val colorCustom: Int? = null, // Almacenado como ARGB Int
-    val tonoUri: String? = null    // URI del tono de notificación/alarma
+    val tonoUri: String? = null,    // URI del tono de notificación/alarma
+    val prioridad: Int = 0, // 0: Baja, 1: Media, 2: Alta
+    val fechaCreacion: Long = System.currentTimeMillis()
 )
 
 @Entity(tableName = "tareas")

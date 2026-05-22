@@ -8,17 +8,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -27,16 +29,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.milista.R
 import com.example.milista.data.Recordatorio
 import com.example.milista.ui.theme.*
-import com.example.milista.ui.utils.getTranslatedText
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -44,25 +47,23 @@ import java.util.*
 @Composable
 fun ReminderScreen(
     viewModel: MiListaViewModel = viewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToAdd: (String) -> Unit
 ) {
-    val selectedLanguage by viewModel.selectedLanguage.collectAsState()
     val recordatorios by viewModel.recordatorios.collectAsState()
+    var selectedFilterId by remember { mutableIntStateOf(R.string.all_filter) }
     
-    var selectedTab by remember { mutableStateOf("Próximos") }
-    var showAddSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    val pendingCount = remember(recordatorios) { recordatorios.count { !it.isCompleted } }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF000000))) {
-        // Glow verde sutil de fondo
+    Box(modifier = Modifier.fillMaxSize().background(AmoledBlack)) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .drawBehind {
                     drawRect(
                         Brush.radialGradient(
-                            colors = listOf(NeonGreen.copy(alpha = 0.04f), Color.Transparent),
-                            center = Offset(size.width * 0.1f, size.height * 0.1f),
+                            colors = listOf(NeonGreen.copy(alpha = 0.03f), Color.Transparent),
+                            center = Offset(size.width * 0.9f, size.height * 0.1f),
                             radius = size.width * 1.5f
                         )
                     )
@@ -71,392 +72,217 @@ fun ReminderScreen(
 
         Scaffold(
             containerColor = Color.Transparent,
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { showAddSheet = true },
-                    containerColor = NeonGreen,
-                    contentColor = Color.Black,
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .padding(bottom = 100.dp)
-                        .size(64.dp)
-                        .shadow(16.dp, CircleShape, spotColor = NeonGreen)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Nuevo recordatorio", modifier = Modifier.size(32.dp))
-                }
+            topBar = {
+                ReminderTopBarPremium(pendingCount)
             }
         ) { padding ->
             LazyColumn(
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize(),
-                contentPadding = PaddingValues(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Header
+                // Botón Agregar Elegante
                 item {
-                    ReminderHeaderV2(onBack)
+                    NewReminderButtonPremium { onNavigateToAdd("Otro") }
                 }
 
-                // Tabs
+                // Filtros Chips
                 item {
-                    ReminderTabsV2(
-                        selectedTab = selectedTab,
-                        onTabSelected = { selectedTab = it },
-                        language = selectedLanguage
-                    )
+                    ReminderFilterChipsPremium(selectedFilterId) { selectedFilterId = it }
                 }
 
-                // Subheader dinámico
-                item {
-                    Text(
-                        text = "$selectedTab recordatorios",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                // Lista Filtrada
-                val filteredList = when (selectedTab) {
-                    "Hoy" -> recordatorios.filter { isSameDay(it.fecha, System.currentTimeMillis()) }
-                    "Completados" -> recordatorios.filter { it.isCompleted }
-                    else -> recordatorios.filter { !it.isCompleted }
-                }.sortedBy { it.fecha }
-
-                if (filteredList.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "No hay recordatorios pendientes ✨",
-                                color = GrayText.copy(alpha = 0.5f),
-                                fontSize = 14.sp
-                            )
-                        }
+                // Lista de Recordatorios con Orden Inteligente
+                val now = System.currentTimeMillis()
+                val sortedList = recordatorios.filter { reminder ->
+                    when (selectedFilterId) {
+                        R.string.today_filter -> isSameDayLocal(reminder.fecha, now)
+                        R.string.overdue_filter -> reminder.fecha < now && !reminder.isCompleted
+                        R.string.completed_filter -> reminder.isCompleted
+                        else -> true // Todos
                     }
+                }.sortedWith(
+                    compareByDescending<Recordatorio> { it.prioridad }
+                        .thenBy { it.isCompleted }
+                        .thenBy { it.fecha }
+                )
+
+                if (sortedList.isEmpty()) {
+                    item { EmptyReminderStatePremium() }
                 } else {
-                    items(filteredList) { reminder ->
-                        ReminderPremiumCard(reminder, selectedLanguage)
-                    }
-                }
-
-                // Recordatorios Inteligentes Section
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Recordatorios inteligentes", color = Color.White, fontWeight = FontWeight.Bold)
-                        Text("Ver todos >", color = NeonGreen, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        SmartReminderCard(
-                            icon = Icons.Rounded.AccessTime,
-                            title = "Tienes 3 recordatorios importantes hoy",
-                            subtitle = "Mantén tu productividad",
-                            modifier = Modifier.weight(1f)
-                        )
-                        SmartReminderCard(
-                            icon = Icons.Rounded.NotificationsActive,
-                            title = "Activa las notificaciones inteligentes",
-                            subtitle = "Nunca olvides nada",
-                            modifier = Modifier.weight(1f)
+                    items(sortedList, key = { it.id }) { reminder ->
+                        ReminderCardAdvanced(
+                            reminder = reminder,
+                            onToggle = { viewModel.toggleRecordatorio(reminder) },
+                            onDelete = { viewModel.borrarRecordatorio(reminder) },
+                            onClick = { onNavigateToAdd("${reminder.tipo}?reminderId=${reminder.id}") }
                         )
                     }
                 }
-                
+
                 item { Spacer(modifier = Modifier.height(100.dp)) }
             }
         }
-
-        if (showAddSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showAddSheet = false },
-                sheetState = sheetState,
-                containerColor = CardDark
-            ) {
-                AddReminderBottomSheet(
-                    viewModel = viewModel,
-                    onDismiss = { showAddSheet = false },
-                    onTypeSelected = { tipo ->
-                        showAddSheet = false
-                        // Handle navigation to details if needed
-                    }
-                )
-            }
-        }
     }
 }
 
 @Composable
-fun ReminderHeaderV2(onBack: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
-                    .clickable { onBack() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.AutoMirrored.Rounded.ArrowBack, null, tint = Color.White, modifier = Modifier.size(20.dp))
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = "Recordatorios",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White
-                    )
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        append("Organiza tu día, nunca olvides lo ")
-                        withStyle(style = SpanStyle(color = NeonGreen, fontWeight = FontWeight.Bold)) {
-                            append("importante")
-                        }
-                        append(".")
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = GrayText.copy(alpha = 0.8f)
-                )
-            }
-        }
-        Row {
-            HeaderActionIcon(Icons.Rounded.Search)
-            Spacer(modifier = Modifier.width(10.dp))
-            HeaderActionIcon(Icons.Rounded.Tune)
-            Spacer(modifier = Modifier.width(10.dp))
-            HeaderActionIcon(Icons.Rounded.MoreVert)
-        }
+fun ReminderTopBarPremium(pendingCount: Int) {
+    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+        Text(
+            text = stringResource(R.string.reminders),
+            style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
+            color = Color.White
+        )
+        Text(
+            text = "$pendingCount pendientes hoy ✨",
+            style = MaterialTheme.typography.bodyMedium,
+            color = NeonGreen,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
 @Composable
-fun HeaderActionIcon(icon: ImageVector) {
-    Box(
-        modifier = Modifier
-            .size(42.dp)
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.03f))
-            .border(1.dp, Color.White.copy(alpha = 0.05f), CircleShape)
-            .clickable { },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(icon, null, tint = Color.White, modifier = Modifier.size(18.dp))
-    }
-}
-
-@Composable
-fun ReminderTabsV2(selectedTab: String, onTabSelected: (String) -> Unit, language: String) {
-    val tabs = listOf("Próximos", "Hoy", "Completados")
-    
+fun NewReminderButtonPremium(onClick: () -> Unit) {
     Surface(
-        modifier = Modifier.fillMaxWidth().height(56.dp),
-        shape = RoundedCornerShape(28.dp),
-        color = Color.White.copy(alpha = 0.03f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = NeonGreen.copy(alpha = 0.08f),
+        border = BorderStroke(1.dp, NeonGreen.copy(alpha = 0.2f))
     ) {
         Row(
-            modifier = Modifier.padding(4.dp),
-            horizontalArrangement = Arrangement.SpaceAround
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            tabs.forEach { tab ->
-                val isSelected = selectedTab == tab
-                val bgColor = if (isSelected) NeonGreen else Color.Transparent
-                val contentColor = if (isSelected) Color.Black else GrayText
-                
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(bgColor)
-                        .clickable { onTabSelected(tab) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (tab == "Próximos") Icon(Icons.Rounded.CalendarToday, null, tint = contentColor, modifier = Modifier.size(14.dp))
-                        if (tab == "Hoy") Icon(Icons.Rounded.WbSunny, null, tint = contentColor, modifier = Modifier.size(14.dp))
-                        if (tab == "Completados") Icon(Icons.Rounded.CheckCircle, null, tint = contentColor, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = getTranslatedText(tab, language),
-                            color = contentColor,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+            Icon(Icons.Rounded.Add, null, tint = NeonGreen)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text("Nuevo recordatorio", color = NeonGreen, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+fun ReminderFilterChipsPremium(selectedId: Int, onSelect: (Int) -> Unit) {
+    val filters = listOf(
+        R.string.all_filter,
+        R.string.today_filter,
+        R.string.overdue_filter,
+        R.string.completed_filter
+    )
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        items(filters) { filterId ->
+            val isSelected = selectedId == filterId
+            Surface(
+                onClick = { onSelect(filterId) },
+                shape = RoundedCornerShape(16.dp),
+                color = if (isSelected) NeonGreen else Color.White.copy(alpha = 0.05f),
+                border = BorderStroke(1.dp, if (isSelected) NeonGreen else Color.White.copy(alpha = 0.1f))
+            ) {
+                Text(
+                    text = stringResource(filterId),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = if (isSelected) AmoledBlack else Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
             }
         }
     }
 }
 
 @Composable
-fun ReminderPremiumCard(reminder: Recordatorio, language: String) {
-    val isOtro = reminder.tipo == "Otro"
-    val categoryColor = if (isOtro && reminder.colorCustom != null) Color(reminder.colorCustom) else {
-        when(reminder.tipo) {
-            "Trabajo" -> Purple
-            "Salud" -> Orange
-            "Estudio" -> Blue
-            "Personal" -> NeonGreen
-            "Evento" -> Color(0xFFD48BFF)
-            else -> NeonGreen
-        }
+fun ReminderCardAdvanced(
+    reminder: Recordatorio,
+    onToggle: () -> Unit,
+    onDelete: () -> Unit,
+    onClick: () -> Unit
+) {
+    val isOverdue = reminder.fecha < System.currentTimeMillis() && !reminder.isCompleted
+    val priorityColor = when(reminder.prioridad) {
+        2 -> SamsungRed
+        1 -> Color(0xFFFFD600)
+        else -> NeonGreen
     }
 
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(12.dp, RoundedCornerShape(28.dp), spotColor = Color.Black),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().alpha(if (reminder.isCompleted) 0.5f else 1f),
         shape = RoundedCornerShape(28.dp),
-        color = CardDark.copy(alpha = 0.8f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+        color = CardDark,
+        border = BorderStroke(1.dp, if (reminder.isCompleted) Color.White.copy(alpha = 0.05f) else BorderGlow)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icono Izquierda
+            // Checkbox Custom
             Box(
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(28.dp)
                     .clip(CircleShape)
-                    .background(categoryColor.copy(alpha = 0.1f)),
+                    .background(if (reminder.isCompleted) NeonGreen else Color.Transparent)
+                    .border(2.dp, if (reminder.isCompleted) NeonGreen else GrayText.copy(alpha = 0.4f), CircleShape)
+                    .clickable { onToggle() },
                 contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .blur(10.dp)
-                        .background(categoryColor.copy(alpha = 0.15f), CircleShape)
-                )
-                Text(
-                    text = if (isOtro) (reminder.emojiCustom ?: "🔔") else getCategoryEmoji(reminder.tipo),
-                    fontSize = 24.sp
-                )
-                // Dot status indicator
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .offset(x = (-4).dp, y = 4.dp)
-                        .size(8.dp)
-                        .background(categoryColor, CircleShape)
-                        .border(1.5.dp, CardDark, CircleShape)
-                )
+                if (reminder.isCompleted) Icon(Icons.Default.Check, null, tint = AmoledBlack, modifier = Modifier.size(18.dp))
             }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            // Centro
+
+            Spacer(modifier = Modifier.width(20.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if (isOtro) reminder.nombreCustom ?: "Recordatorio" else reminder.tipo,
+                    text = reminder.nombreCustom ?: reminder.tipo,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color.White
+                    fontSize = 18.sp,
+                    color = Color.White,
+                    textDecoration = if (reminder.isCompleted) TextDecoration.LineThrough else null
                 )
-                Text(
-                    text = SimpleDateFormat("EEEE, d MMM, HH:mm", Locale.getDefault()).format(Date(reminder.fecha)),
-                    fontSize = 12.sp,
-                    color = categoryColor,
-                    fontWeight = FontWeight.Medium
-                )
+                
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-                    Icon(Icons.Rounded.Refresh, null, tint = GrayText, modifier = Modifier.size(12.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = reminder.repeatMode, fontSize = 11.sp, color = GrayText)
+                    Icon(
+                        if (isOverdue) Icons.Rounded.PriorityHigh else Icons.Rounded.Schedule, 
+                        null, 
+                        tint = if (isOverdue) SamsungRed else GrayText, 
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = SimpleDateFormat("d MMM, HH:mm", Locale.getDefault()).format(Date(reminder.fecha)),
+                        fontSize = 12.sp,
+                        color = if (isOverdue) SamsungRed else GrayText
+                    )
+                    if (reminder.prioridad > 0) {
+                        Text(" • ", color = GrayText)
+                        Box(modifier = Modifier.size(8.dp).background(priorityColor, CircleShape).shadow(4.dp, CircleShape, spotColor = priorityColor))
+                    }
                 }
             }
-            
-            // Derecha
-            Column(horizontalAlignment = Alignment.End) {
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = categoryColor.copy(alpha = 0.1f),
-                    border = BorderStroke(1.dp, categoryColor.copy(alpha = 0.2f))
-                ) {
-                    Text(
-                        text = reminder.tipo,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        fontSize = 10.sp,
-                        color = categoryColor,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row {
-                    Icon(
-                        if (reminder.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-                        null,
-                        tint = if (reminder.isFavorite) NeonGreen else GrayText.copy(alpha = 0.3f),
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.Rounded.MoreVert, null, tint = GrayText.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
-                }
+
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, null, tint = GrayText.copy(alpha = 0.3f), modifier = Modifier.size(20.dp))
             }
         }
     }
 }
 
 @Composable
-fun SmartReminderCard(icon: ImageVector, title: String, subtitle: String, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.height(140.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = Color.White.copy(alpha = 0.03f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+fun EmptyReminderStatePremium() {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = 100.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            Box(
-                modifier = Modifier.size(40.dp).background(NeonGreen.copy(alpha = 0.1f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(icon, null, tint = NeonGreen, modifier = Modifier.size(20.dp))
-            }
-            Column {
-                Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 16.sp)
-                Text(subtitle, color = GrayText, fontSize = 10.sp, modifier = Modifier.padding(top = 4.dp))
-            }
-        }
+        Icon(Icons.Rounded.NotificationsNone, null, tint = Color.White.copy(alpha = 0.05f), modifier = Modifier.size(100.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+        Text("No hay recordatorios", color = GrayText.copy(alpha = 0.4f), fontSize = 16.sp)
     }
 }
 
-fun getCategoryEmoji(tipo: String): String {
-    return when(tipo) {
-        "Trabajo" -> "💼"
-        "Salud" -> "💊"
-        "Estudio" -> "📚"
-        "Personal" -> "🧘"
-        "Evento" -> "🎁"
-        else -> "🔔"
-    }
-}
-
-fun isSameDay(t1: Long, t2: Long): Boolean {
+fun isSameDayLocal(t1: Long, t2: Long): Boolean {
     val cal1 = Calendar.getInstance().apply { timeInMillis = t1 }
     val cal2 = Calendar.getInstance().apply { timeInMillis = t2 }
     return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Noctra</string>
+    <string name="home">ホーム</string>
+    <string name="calendar">カレンダー</string>
+    <string name="clock">時計</string>
+    <string name="notes">メモ</string>
+    <string name="settings">設定</string>
+    <string name="reminders">リマインダー</string>
+    <string name="focus">フォーカス</string>
+    <string name="lists">リスト</string>
+
+    <string name="good_morning">おはようございます</string>
+    <string name="good_afternoon">こんにちは</string>
+    <string name="good_evening">こんばんは</string>
+
+    <string name="organize_day">一日を整理しましょう。</string>
+    <string name="maximize_potential">可能性を</string>
+    <string name="your_potential">最大限に引き出す。</string>
+
+    <string name="productivity">生産性</string>
+    <string name="today">今日</string>
+    <string name="on_track">順調です</string>
+
+    <string name="next_event">次のイベント</string>
+    <string name="no_events">イベントはありません</string>
+    <string name="see_full_calendar">カレンダーをすべて表示 ></string>
+
+    <string name="quick_notes">クイックメモ</string>
+    <string name="recent_notes">最近のメモ</string>
+    <string name="no_recent_notes">最近のメモはありません</string>
+    <string name="see_all">すべて表示 ></string>
+
+    <string name="day_summary">一日の概要</string>
+    <string name="tasks">タスク</string>
+    <string name="completed">完了</string>
+    <string name="goals">目標</string>
+    <string name="status_in_progress">進行中</string>
+    <string name="streak">継続</string>
+    <string name="days_followed">継続日数</string>
+
+    <string name="quick_access">クイックアクセス</string>
+    <string name="customize">カスタマイズ</string>
+    <string name="new_note">新しいメモ</string>
+    <string name="new_reminder">新しいリマインダー</string>
+    <string name="new_list">新しいリスト</string>
+    <string name="focus_block">集中ブロック</string>
+
+    <string name="appearance">外観</string>
+    <string name="app_theme">アプリのテーマ</string>
+    <string name="font_type">フォントの種類</string>
+    <string name="font_size">フォントサイズ</string>
+    <string name="general">一般</string>
+    <string name="language">言語</string>
+    <string name="notifications">通知</string>
+    <string name="sound_vibration">音とバイブレーション</string>
+    <string name="do_not_disturb">おやすみモード</string>
+    <string name="silence_notifications">一時的に通知を停止</string>
+    <string name="privacy">プライバシー</string>
+    <string name="manage_privacy">プライバシーとデータの管理</string>
+    <string name="backup">バックアップ</string>
+    <string name="sync_data">データの同期</string>
+    <string name="delete_data">データを削除</string>
+    <string name="delete_all_data">すべてのアプリデータを削除</string>
+    <string name="more">その他</string>
+    <string name="help_support">ヘルプとサポート</string>
+    <string name="help_center">ヘルプセンターと連絡先</string>
+    <string name="about_noctra">Noctraについて</string>
+    <string name="version">バージョン 1.0.0</string>
+
+    <string name="dark">ダーク</string>
+    <string name="light">ライト</string>
+    <string name="system">システム</string>
+
+    <string name="upcoming">予定</string>
+    <string name="completed_reminders">完了済み</string>
+    <string name="no_pending_reminders">保留中のリマインダーはありません ✨</string>
+    <string name="smart_reminders">インテリジェントリマインダー</string>
+    <string name="important_reminders_today">今日は %1$d 個の重要なリマインダーがあります</string>
+    <string name="keep_productivity">生産性を維持しましょう</string>
+    <string name="activate_smart_notifications">スマート通知を有効にする</string>
+    <string name="never_forget_anything">忘れ物をなくしましょう</string>
+    <string name="organize_your_day_never_forget">一日を整理し、</string>
+    <string name="important">重要</string>
+
+    <string name="applying_changes">変更を適用しています...</string>
+    <string name="close">閉じる</string>
+    <string name="create">作成</string>
+    <string name="cancel">キャンセル</string>
+    <string name="name">名前</string>
+    <string name="save_event">イベントを保存</string>
+    <string name="select_date">日付を選択</string>
+    <string name="select_time">時間を選択</string>
+</resources>

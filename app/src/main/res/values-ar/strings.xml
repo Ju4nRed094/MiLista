@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Noctra</string>
+    <string name="home">الرئيسية</string>
+    <string name="calendar">التقويم</string>
+    <string name="clock">الساعة</string>
+    <string name="notes">الملاحظات</string>
+    <string name="settings">الإعدادات</string>
+    <string name="reminders">التذكيرات</string>
+    <string name="focus">التركيز</string>
+    <string name="lists">القوائم</string>
+
+    <string name="good_morning">صباح الخير</string>
+    <string name="good_afternoon">مساء الخير</string>
+    <string name="good_evening">طاب مساؤك</string>
+
+    <string name="organize_day">نظم يومك.</string>
+    <string name="maximize_potential">عزز</string>
+    <string name="your_potential"> إمكاناتك.</string>
+
+    <string name="productivity">الإنتاجية</string>
+    <string name="today">اليوم</string>
+    <string name="on_track">أنت على الطريق الصحيح</string>
+
+    <string name="next_event">الحدث القادم</string>
+    <string name="no_events">لا توجد أحداث</string>
+    <string name="see_full_calendar">عرض التقويم بالكامل ></string>
+
+    <string name="quick_notes">ملاحظات سريعة</string>
+    <string name="recent_notes">الملاحظات الأخيرة</string>
+    <string name="no_recent_notes">لا توجد ملاحظات أخيرة</string>
+    <string name="see_all">عرض الكل ></string>
+
+    <string name="day_summary">ملخص اليوم</string>
+    <string name="tasks">المهام</string>
+    <string name="completed">مكتملة</string>
+    <string name="goals">الأهداف</string>
+    <string name="status_in_progress">قيد التنفيذ</string>
+    <string name="streak">سلسلة</string>
+    <string name="days_followed">أيام متتالية</string>
+
+    <string name="quick_access">وصول سريع</string>
+    <string name="customize">تخصيص</string>
+    <string name="new_note">ملاحظة جديدة</string>
+    <string name="new_reminder">تذكير جديد</string>
+    <string name="new_list">قائمة جديدة</string>
+    <string name="focus_block">كتلة التركيز</string>
+
+    <string name="appearance">المظهر</string>
+    <string name="app_theme">طابع التطبيق</string>
+    <string name="font_type">نوع الخط</string>
+    <string name="font_size">حجم الخط</string>
+    <string name="general">عام</string>
+    <string name="language">اللغة</string>
+    <string name="notifications">الإشعارات</string>
+    <string name="sound_vibration">تنبيهات صوتية واهتزاز</string>
+    <string name="do_not_disturb">عدم الإزعاج</string>
+    <string name="silence_notifications">كتم الإشعارات مؤقتًا</string>
+    <string name="privacy">الخصوصية</string>
+    <string name="manage_privacy">إدارة الخصوصية والبيانات</string>
+    <string name="backup">نسخة احتياطية</string>
+    <string name="sync_data">مزامنة بياناتك</string>
+    <string name="delete_data">حذف البيانات</string>
+    <string name="delete_all_data">حذف جميع بيانات التطبيق</string>
+    <string name="more">المزيد</string>
+    <string name="help_support">المساعدة والدعم</string>
+    <string name="help_center">مركز المساعدة والتواصل</string>
+    <string name="about_noctra">حول Noctra</string>
+    <string name="version">الإصدار 1.0.0</string>
+
+    <string name="dark">داكن</string>
+    <string name="light">فاتح</string>
+    <string name="system">النظام</string>
+
+    <string name="upcoming">القادمة</string>
+    <string name="completed_reminders">المكتملة</string>
+    <string name="no_pending_reminders">لا توجد تذكيرات معلقة ✨</string>
+    <string name="smart_reminders">تذكيرات ذكية</string>
+    <string name="important_reminders_today">لديك %1$d تذكيرات مهمة اليوم</string>
+    <string name="keep_productivity">حافظ على إنتاجيتك</string>
+    <string name="activate_smart_notifications">تفعيل الإشعارات الذكية</string>
+    <string name="never_forget_anything">لا تنسَ شيئًا أبدًا</string>
+    <string name="organize_your_day_never_forget">نظم يومك، ولا تنسَ أبدًا ما هو </string>
+    <string name="important">مهم</string>
+
+    <string name="applying_changes">جارٍ تطبيق التغييرات...</string>
+    <string name="close">إغلاق</string>
+    <string name="create">إنشاء</string>
+    <string name="cancel">إلغاء</string>
+    <string name="name">الاسم</string>
+    <string name="save_event">حفظ الحدث</string>
+    <string name="select_date">اختر التاريخ</string>
+    <string name="select_time">اختر الوقت</string>
+</resources>

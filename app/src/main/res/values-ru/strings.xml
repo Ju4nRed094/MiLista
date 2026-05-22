@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Noctra</string>
+    <string name="home">Главная</string>
+    <string name="calendar">Календарь</string>
+    <string name="clock">Часы</string>
+    <string name="notes">Заметки</string>
+    <string name="settings">Настройки</string>
+    <string name="reminders">Напоминания</string>
+    <string name="focus">Фокус</string>
+    <string name="lists">Списки</string>
+
+    <string name="good_morning">Доброе утро</string>
+    <string name="good_afternoon">Добрый день</string>
+    <string name="good_evening">Добрый вечер</string>
+
+    <string name="organize_day">Организуйте свой день.</string>
+    <string name="maximize_potential">Раскройте свой</string>
+    <string name="your_potential"> потенциал.</string>
+
+    <string name="productivity">Продуктивность</string>
+    <string name="today">Сегодня</string>
+    <string name="on_track">Вы на верном пути</string>
+
+    <string name="next_event">Следующее событие</string>
+    <string name="no_events">Нет событий</string>
+    <string name="see_full_calendar">Весь календарь ></string>
+
+    <string name="quick_notes">Быстрые заметки</string>
+    <string name="recent_notes">Недавние заметки</string>
+    <string name="no_recent_notes">Нет недавних заметок</string>
+    <string name="see_all">Показать все ></string>
+
+    <string name="day_summary">Итоги дня</string>
+    <string name="tasks">Задачи</string>
+    <string name="completed">выполнено</string>
+    <string name="goals">Цели</string>
+    <string name="status_in_progress">В процессе</string>
+    <string name="streak">Серия</string>
+    <string name="days_followed">Дней подряд</string>
+
+    <string name="quick_access">Быстрый доступ</string>
+    <string name="customize">Настроить</string>
+    <string name="new_note">Новая заметка</string>
+    <string name="new_reminder">Новое напоминание</string>
+    <string name="new_list">Новый список</string>
+    <string name="focus_block">Блок фокуса</string>
+
+    <string name="appearance">Внешний вид</string>
+    <string name="app_theme">Тема приложения</string>
+    <string name="font_type">Тип шрифта</string>
+    <string name="font_size">Размер шрифта</string>
+    <string name="general">Общие</string>
+    <string name="language">Язык</string>
+    <string name="notifications">Уведомления</string>
+    <string name="sound_vibration">Звуки и вибрация</string>
+    <string name="do_not_disturb">Не беспокоить</string>
+    <string name="silence_notifications">Временно отключить уведомления</string>
+    <string name="privacy">Конфиденциальность</string>
+    <string name="manage_privacy">Управление данными</string>
+    <string name="backup">Резервное копирование</string>
+    <string name="sync_data">Синхронизация данных</string>
+    <string name="delete_data">Удалить данные</string>
+    <string name="delete_all_data">Удалить все данные приложения</string>
+    <string name="more">Ещё</string>
+    <string name="help_support">Помощь и поддержка</string>
+    <string name="help_center">Центр поддержки</string>
+    <string name="about_noctra">О приложении Noctra</string>
+    <string name="version">Версия 1.0.0</string>
+
+    <string name="dark">Темная</string>
+    <string name="light">Светлая</string>
+    <string name="system">Системная</string>
+
+    <string name="upcoming">Будущие</string>
+    <string name="completed_reminders">Завершенные</string>
+    <string name="no_pending_reminders">Нет активных напоминаний ✨</string>
+    <string name="smart_reminders">Умные напоминания</string>
+    <string name="important_reminders_today">У вас %1$d важных напоминаний на сегодня</string>
+    <string name="keep_productivity">Сохраняйте продуктивность</string>
+    <string name="activate_smart_notifications">Включить умные уведомления</string>
+    <string name="never_forget_anything">Ничего не забывайте</string>
+    <string name="organize_your_day_never_forget">Организуйте день, не забывая о </string>
+    <string name="important">важном</string>
+
+    <string name="applying_changes">Применение изменений...</string>
+    <string name="close">Закрыть</string>
+    <string name="create">Создать</string>
+    <string name="cancel">Отмена</string>
+    <string name="name">Название</string>
+    <string name="save_event">Сохранить событие</string>
+    <string name="select_date">Выберите дату</string>
+    <string name="select_time">Выберите время</string>
+</resources>

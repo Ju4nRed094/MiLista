@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Noctra</string>
+    <string name="home">Início</string>
+    <string name="calendar">Calendário</string>
+    <string name="clock">Relógio</string>
+    <string name="notes">Notas</string>
+    <string name="settings">Configurações</string>
+    <string name="reminders">Lembretes</string>
+    <string name="focus">Foco</string>
+    <string name="lists">Listas</string>
+
+    <string name="good_morning">Bom dia</string>
+    <string name="good_afternoon">Boa tarde</string>
+    <string name="good_evening">Boa noite</string>
+
+    <string name="organize_day">Organize seu dia.</string>
+    <string name="maximize_potential">Maximize</string>
+    <string name="your_potential"> seu potencial.</string>
+
+    <string name="productivity">Produtividade</string>
+    <string name="today">Hoje</string>
+    <string name="on_track">Você está no caminho certo</string>
+
+    <string name="next_event">Próximo evento</string>
+    <string name="no_events">Sem eventos</string>
+    <string name="see_full_calendar">Ver calendário completo ></string>
+
+    <string name="quick_notes">Notas rápidas</string>
+    <string name="recent_notes">Notas recentes</string>
+    <string name="no_recent_notes">Sem notas recentes</string>
+    <string name="see_all">Ver todas ></string>
+
+    <string name="day_summary">Resumo do dia</string>
+    <string name="tasks">Tarefas</string>
+    <string name="completed">concluídas</string>
+    <string name="goals">Objetivos</string>
+    <string name="status_in_progress">Em progresso</string>
+    <string name="streak">Sequência</string>
+    <string name="days_followed">Dias seguidos</string>
+
+    <string name="quick_access">Acesso rápido</string>
+    <string name="customize">Personalizar</string>
+    <string name="new_note">Nova nota</string>
+    <string name="new_reminder">Novo lembrete</string>
+    <string name="new_list">Nova lista</string>
+    <string name="focus_block">Bloco de foco</string>
+
+    <string name="appearance">Aparência</string>
+    <string name="app_theme">Tema do app</string>
+    <string name="font_type">Tipo de fonte</string>
+    <string name="font_size">Tamanho da fonte</string>
+    <string name="general">Geral</string>
+    <string name="language">Idioma</string>
+    <string name="notifications">Notificações</string>
+    <string name="sound_vibration">Alertas sonoros e vibração</string>
+    <string name="do_not_disturb">Não perturbe</string>
+    <string name="silence_notifications">Silenciar notificações temporariamente</string>
+    <string name="privacy">Privacidade</string>
+    <string name="manage_privacy">Gerenciar privacidade e dados</string>
+    <string name="backup">Backup</string>
+    <string name="sync_data">Sincronizar seus dados</string>
+    <string name="delete_data">Excluir dados</string>
+    <string name="delete_all_data">Excluir todos os seus dados do app</string>
+    <string name="more">Mais</string>
+    <string name="help_support">Ajuda e suporte</string>
+    <string name="help_center">Central de ajuda e contato</string>
+    <string name="about_noctra">Sobre o Noctra</string>
+    <string name="version">Versão 1.0.0</string>
+
+    <string name="dark">Escuro</string>
+    <string name="light">Claro</string>
+    <string name="system">Sistema</string>
+
+    <string name="upcoming">Próximos</string>
+    <string name="completed_reminders">Concluídos</string>
+    <string name="no_pending_reminders">Sem lembretes pendentes ✨</string>
+    <string name="smart_reminders">Lembretes inteligentes</string>
+    <string name="important_reminders_today">Você tem %1$d lembretes importantes hoje</string>
+    <string name="keep_productivity">Mantenha sua produtividade</string>
+    <string name="activate_smart_notifications">Ativar notificações inteligentes</string>
+    <string name="never_forget_anything">Nunca esqueça nada</string>
+    <string name="organize_your_day_never_forget">Organize seu dia, nunca esqueça o que é </string>
+    <string name="important">importante</string>
+
+    <string name="applying_changes">Aplicando alterações...</string>
+    <string name="close">Fechar</string>
+    <string name="create">Criar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="name">Nome</string>
+    <string name="save_event">Salvar Evento</string>
+    <string name="select_date">Selecionar data</string>
+    <string name="select_time">Selecionar hora</string>
+</resources>

@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Noctra</string>
-    <string name="home">Inicio</string>
-    <string name="calendar">Calendario</string>
-    <string name="clock">Reloj</string>
-    <string name="notes">Notas</string>
-    <string name="settings">Ajustes</string>
-    <string name="reminders">Recordatorios</string>
+    <string name="home">Mari mari</string>
+    <string name="calendar">Antü wirin</string>
+    <string name="clock">Rüpü antü</string>
+    <string name="notes">Chillka</string>
+    <string name="settings">Ngünekan</string>
+    <string name="reminders">Rakiduam</string>
     <string name="focus">Enfoque</string>
-    <string name="lists">Listas</string>
+    <string name="lists">Troy</string>
 
-    <string name="good_morning">Buenos días</string>
-    <string name="good_afternoon">Buenas tardes</string>
-    <string name="good_evening">Buenas noches</string>
+    <string name="good_morning">Mari mari</string>
+    <string name="good_afternoon">Mari mari</string>
+    <string name="good_evening">Mari mari</string>
 
     <string name="organize_day">Organiza tu día.</string>
     <string name="maximize_potential">Maximiza</string>
     <string name="your_potential"> tu potencial.</string>
 
     <string name="productivity">Productividad</string>
-    <string name="today">Hoy</string>
+    <string name="today">Fantepu</string>
     <string name="on_track">Vas por buen camino</string>
 
     <string name="next_event">Próximo evento</string>
     <string name="no_events">No hay eventos</string>
     <string name="see_full_calendar">Ver calendario completo ></string>
 
-    <string name="quick_notes">Notas rápidas</string>
+    <string name="quick_notes">Chillka pichi</string>
     <string name="recent_notes">Notas recientes</string>
     <string name="no_recent_notes">No hay notas recientes</string>
     <string name="see_all">Ver todas ></string>
@@ -41,9 +41,9 @@
 
     <string name="quick_access">Accesos rápidos</string>
     <string name="customize">Personalizar</string>
-    <string name="new_note">Nueva nota</string>
-    <string name="new_reminder">Nuevo recordatorio</string>
-    <string name="new_list">Nueva lista</string>
+    <string name="new_note">We Chillka</string>
+    <string name="new_reminder">We Rakiduam</string>
+    <string name="new_list">We Troy</string>
     <string name="focus_block">Bloque de enfoque</string>
 
     <string name="appearance">Apariencia</string>
@@ -51,7 +51,7 @@
     <string name="font_type">Tipo de letra</string>
     <string name="font_size">Tamaño de letra</string>
     <string name="general">General</string>
-    <string name="language">Idioma</string>
+    <string name="language">Kezungun</string>
     <string name="notifications">Notificaciones</string>
     <string name="sound_vibration">Avisos sonoros y vibración</string>
     <string name="do_not_disturb">No molestar</string>
@@ -62,10 +62,10 @@
     <string name="sync_data">Sincroniza tus datos</string>
     <string name="delete_data">Borrar datos</string>
     <string name="delete_all_data">Elimina todos tus datos de la app</string>
-    <string name="more">Más</string>
-    <string name="help_support">Ayuda y soporte</string>
+    <string name="more">Doy</string>
+    <string name="help_support">Kellu</string>
     <string name="help_center">Centro de ayuda y contacto</string>
-    <string name="about_noctra">Acerca de Noctra (Incluye soporte cultural para Mapudungun 🌿)</string>
+    <string name="about_noctra">Noctra (Mapudungun Kellu 🌿)</string>
     <string name="version">Versión 1.0.0</string>
 
     <string name="dark">Oscuro</string>
@@ -83,12 +83,12 @@
     <string name="organize_your_day_never_forget">Organiza tu día, nunca olvides lo </string>
     <string name="important">importante</string>
 
-    <string name="applying_changes">Aplicando cambios...</string>
+    <string name="applying_changes">Tayiñ trawün müley...</string>
     <string name="close">Cerrar</string>
     <string name="create">Crear</string>
-    <string name="cancel">Cancelar</string>
+    <string name="cancel">Ngewelay</string>
     <string name="name">Nombre</string>
-    <string name="save_event">Guardar Evento</string>
+    <string name="save_event">Fill</string>
     <string name="select_date">Selecciona la fecha</string>
     <string name="select_time">Selecciona la hora</string>
 
@@ -126,21 +126,19 @@
     <string name="title">Título</string>
     <string name="write_something_smart">Escribe algo inteligente...</string>
     <string name="setup_alert">Configurar Aviso</string>
-    <string name="all_time">Todo en su tiempo ✨</string>
+    <string name="all_time">Fill rüpü antü ✨</string>
     <string name="overdue">Vencidos</string>
-    <string name="schedule_day">Horario del día</string>
-    <string name="clean_agenda">Tu agenda está limpia hoy</string>
-    <string name="no_events_day">No hubo eventos este día</string>
+    <string name="schedule_day">Antü wirin</string>
+    <string name="clean_agenda">Küme antü</string>
+    <string name="no_events_day">Ngewelay</string>
     <string name="week">Semana</string>
-    <string name="month">Mes</string>
-    <string name="day">Día</string>
+    <string name="month">Küyen</string>
+    <string name="day">Antü</string>
     <string name="agenda">Agenda</string>
-    <string name="all_filter">Todo</string>
-    <string name="today_filter">Hoy</string>
+    <string name="all_filter">Fill</string>
+    <string name="today_filter">Fantepu</string>
     <string name="overdue_filter">Vencidos</string>
     <string name="completed_filter">Completados</string>
-    <string name="pending_filter">Pendientes</string>
-    <string name="urgent_filter">Urgentes</string>
-    <string name="synced_calendar">Sincronizado con tu calendario ✨</string>
-    <string name="all_in_order">Todo en orden</string>
+    <string name="synced_calendar">Antü wirin ✨</string>
+    <string name="all_in_order">Küme müley</string>
 </resources>

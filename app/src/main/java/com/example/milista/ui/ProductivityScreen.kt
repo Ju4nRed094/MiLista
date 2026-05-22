@@ -15,11 +15,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.milista.R
 import com.example.milista.ui.theme.*
-import com.example.milista.ui.utils.getTranslatedText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,7 +28,6 @@ fun ProductivityScreen(
     viewModel: MiListaViewModel,
     onBack: () -> Unit
 ) {
-    val selectedLanguage by viewModel.selectedLanguage.collectAsState()
     val unifiedItems by viewModel.unifiedItems.collectAsState()
     
     val completedTasks = unifiedItems.count { it.isCompleted }
@@ -40,8 +40,8 @@ fun ProductivityScreen(
             LargeTopAppBar(
                 title = { 
                     Column {
-                        Text(getTranslatedText("Productividad", selectedLanguage), style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, fontSize = 32.sp), color = Color.White)
-                        Text(getTranslatedText("Tu progreso semanal", selectedLanguage), style = MaterialTheme.typography.bodyMedium, color = GrayText)
+                        Text(stringResource(R.string.productivity), style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, fontSize = 32.sp), color = Color.White)
+                        Text("Tu progreso semanal", style = MaterialTheme.typography.bodyMedium, color = GrayText)
                     }
                 },
                 navigationIcon = {
@@ -59,7 +59,7 @@ fun ProductivityScreen(
             item {
                 ProductivityCard {
                     Column(modifier = Modifier.padding(24.dp)) {
-                        Text(getTranslatedText("Resumen", selectedLanguage), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        Text("Resumen", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                         Spacer(modifier = Modifier.height(20.dp))
                         LinearProgressIndicator(
                             progress = { progress },
@@ -69,8 +69,8 @@ fun ProductivityScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("${(progress * 100).toInt()}% " + getTranslatedText("completado", selectedLanguage), color = GrayText, fontSize = 14.sp)
-                            Text("$completedTasks/$totalTasks " + getTranslatedText("tareas", selectedLanguage), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text("${(progress * 100).toInt()}% " + stringResource(R.string.completed), color = GrayText, fontSize = 14.sp)
+                            Text("$completedTasks/$totalTasks " + stringResource(R.string.tasks).lowercase(), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         }
                     }
                 }
@@ -78,18 +78,8 @@ fun ProductivityScreen(
 
             item {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    StatBox(Modifier.weight(1f), Icons.Default.CheckCircle, "$completedTasks", getTranslatedText("Finalizadas", selectedLanguage), SamsungGreen)
-                    StatBox(Modifier.weight(1f), Icons.Default.Pending, "${totalTasks - completedTasks}", getTranslatedText("Pendientes", selectedLanguage), SamsungBlue)
-                }
-            }
-
-            item {
-                ProductivityCard {
-                    Column(modifier = Modifier.padding(24.dp)) {
-                        Text(getTranslatedText("Actividad reciente", selectedLanguage), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(getTranslatedText("Próximamente: Gráficos de rendimiento One UI", selectedLanguage), color = GrayText, fontSize = 14.sp)
-                    }
+                    StatBox(Modifier.weight(1f), Icons.Default.CheckCircle, "$completedTasks", "Finalizadas", SamsungGreen)
+                    StatBox(Modifier.weight(1f), Icons.Default.Pending, "${totalTasks - completedTasks}", "Pendientes", SamsungBlue)
                 }
             }
         }

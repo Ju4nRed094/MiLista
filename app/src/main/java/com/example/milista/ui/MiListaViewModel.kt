@@ -29,6 +29,7 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
     val recordatorios: StateFlow<List<Recordatorio>>
     val alarmas: StateFlow<List<Alarma>>
     val unifiedItems: StateFlow<List<UnifiedItem>>
+    val todasLasTareas: StateFlow<List<Tarea>>
 
     private val _quickNotesId = MutableStateFlow<Int?>(null)
     val quickNotesId = _quickNotesId.asStateFlow()
@@ -45,6 +46,9 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
     private val _selectedFontSize = MutableStateFlow(16f)
     val selectedFontSize = _selectedFontSize.asStateFlow()
 
+    private val _onboardingCompleted = MutableStateFlow(true) // Default true to avoid flash if already done
+    val onboardingCompleted = _onboardingCompleted.asStateFlow()
+
     private val _isApplyingChanges = MutableStateFlow(false)
     val isApplyingChanges = _isApplyingChanges.asStateFlow()
 
@@ -52,7 +56,7 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _isApplyingChanges.value = true
             settingsDataStore.saveFont(fontName)
-            kotlinx.coroutines.delay(1000)
+            kotlinx.coroutines.delay(1500)
             _isApplyingChanges.value = false
         }
     }
@@ -61,7 +65,7 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _isApplyingChanges.value = true
             settingsDataStore.saveLanguage(language)
-            kotlinx.coroutines.delay(1000)
+            kotlinx.coroutines.delay(1500)
             _isApplyingChanges.value = false
         }
     }
@@ -70,7 +74,7 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _isApplyingChanges.value = true
             settingsDataStore.saveTheme(theme)
-            kotlinx.coroutines.delay(1000)
+            kotlinx.coroutines.delay(1500)
             _isApplyingChanges.value = false
         }
     }
@@ -78,6 +82,13 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
     fun updateFontSize(size: Float) {
         viewModelScope.launch {
             settingsDataStore.saveFontSize(size)
+        }
+    }
+
+    fun completeOnboarding() {
+        viewModelScope.launch {
+            settingsDataStore.saveOnboardingCompleted(true)
+            _onboardingCompleted.value = true
         }
     }
 
@@ -115,6 +126,12 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
                 _selectedFontSize.value = size
             }
         }
+
+        viewModelScope.launch {
+            settingsDataStore.onboardingCompleted.collectLatest { completed ->
+                _onboardingCompleted.value = completed
+            }
+        }
         viewModelScope.launch {
             _quickNotesId.value = obtenerIdListaRapida()
         }
@@ -134,6 +151,11 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
             emptyList()
         )
         unifiedItems = repository.getAllUnifiedItems().stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
+        todasLasTareas = repository.obtenerTodasLasTareas().stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             emptyList()
@@ -182,7 +204,8 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
         fecha: Long,
         nombreCustom: String? = null,
         emojiCustom: String? = null,
-        colorCustom: Int? = null
+        colorCustom: Int? = null,
+        prioridad: Int = 0
     ) {
         viewModelScope.launch {
             repository.insertarRecordatorio(
@@ -191,7 +214,8 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
                     fecha = fecha,
                     nombreCustom = nombreCustom,
                     emojiCustom = emojiCustom,
-                    colorCustom = colorCustom
+                    colorCustom = colorCustom,
+                    prioridad = prioridad
                 )
             )
             addUnifiedItem(UnifiedItem(
@@ -199,8 +223,21 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
                 title = nombreCustom ?: tipo,
                 timestamp = fecha,
                 color = colorCustom,
-                icon = emojiCustom
+                icon = emojiCustom,
+                priority = prioridad
             ))
+        }
+    }
+
+    fun actualizarRecordatorio(recordatorio: Recordatorio) {
+        viewModelScope.launch {
+            repository.actualizarRecordatorio(recordatorio)
+        }
+    }
+
+    fun toggleRecordatorio(recordatorio: Recordatorio) {
+        viewModelScope.launch {
+            repository.actualizarRecordatorio(recordatorio.copy(isCompleted = !recordatorio.isCompleted))
         }
     }
 
@@ -220,16 +257,6 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
                 dibujoData = dibujoData,
                 imagenPath = imagenPath,
                 audioPath = audioPath
-            ))
-            addUnifiedItem(UnifiedItem(
-                type = ItemType.TASK,
-                title = titulo,
-                content = contenido,
-                color = color,
-                drawingData = dibujoData,
-                imagePath = imagenPath,
-                audioPath = audioPath,
-                categoryId = listaId
             ))
         }
     }
@@ -273,19 +300,6 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
             val id = repository.insertarAlarma(Alarma(hora = hora, minuto = minuto, dias = dias, etiqueta = etiqueta, tonoUri = tonoUri))
             val nuevaAlarma = Alarma(id = id.toInt(), hora = hora, minuto = minuto, dias = dias, etiqueta = etiqueta, tonoUri = tonoUri, activa = true)
             programarAlarma(nuevaAlarma)
-            
-            val cal = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, hora)
-                set(Calendar.MINUTE, minuto)
-                set(Calendar.SECOND, 0)
-            }
-            addUnifiedItem(UnifiedItem(
-                type = ItemType.ALARM,
-                title = etiqueta.ifEmpty { "Alarma" },
-                timestamp = cal.timeInMillis,
-                recurrence = dias,
-                reminderTonoUri = tonoUri
-            ))
         }
     }
 

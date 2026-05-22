@@ -68,6 +68,9 @@ interface TareaDao {
     @Query("SELECT * FROM tareas WHERE listaId = :listaId ORDER BY fechaCreacion DESC")
     fun obtenerPorLista(listaId: Int): Flow<List<Tarea>>
 
+    @Query("SELECT * FROM tareas ORDER BY fechaCreacion DESC")
+    fun obtenerTodas(): Flow<List<Tarea>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertar(tarea: Tarea)
 

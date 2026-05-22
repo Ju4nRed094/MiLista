@@ -15,11 +15,17 @@ class SettingsDataStore(private val context: Context) {
         val SELECTED_FONT = stringPreferencesKey("selected_font")
         val SELECTED_THEME = stringPreferencesKey("selected_theme")
         val SELECTED_FONT_SIZE = stringPreferencesKey("selected_font_size")
+        val ONBOARDING_COMPLETED = stringPreferencesKey("onboarding_completed")
     }
+
+    val onboardingCompleted: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[ONBOARDING_COMPLETED]?.toBoolean() ?: false
+        }
 
     val selectedLanguage: Flow<String> = context.dataStore.data
         .map { preferences ->
-            preferences[SELECTED_LANGUAGE] ?: "Español (español)"
+            preferences[SELECTED_LANGUAGE] ?: java.util.Locale.getDefault().language
         }
 
     val selectedFont: Flow<String> = context.dataStore.data
@@ -58,6 +64,12 @@ class SettingsDataStore(private val context: Context) {
     suspend fun saveFontSize(size: Float) {
         context.dataStore.edit { preferences ->
             preferences[SELECTED_FONT_SIZE] = size.toString()
+        }
+    }
+
+    suspend fun saveOnboardingCompleted(completed: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[ONBOARDING_COMPLETED] = completed.toString()
         }
     }
 }

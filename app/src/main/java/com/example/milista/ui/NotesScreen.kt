@@ -3,7 +3,6 @@ package com.example.milista.ui
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -12,10 +11,13 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.PushPin
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,7 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,8 +41,6 @@ import coil.compose.AsyncImage
 import com.example.milista.R
 import com.example.milista.data.Tarea
 import com.example.milista.ui.theme.*
-import com.example.milista.ui.utils.getTranslatedText
-import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,39 +51,39 @@ fun NotesScreen(
     onBack: () -> Unit,
     onNavigateToEditor: (Int, Int) -> Unit
 ) {
-    val selectedLanguage by viewModel.selectedLanguage.collectAsState()
     val tareas by viewModel.repository.obtenerTareasPorLista(listaId).collectAsState(initial = emptyList())
-    var selectedCategory by remember { mutableStateOf("Todas") }
+    var selectedCategory by remember { mutableStateOf("all") }
 
     val categories = listOf(
-        "Todas" to Icons.Default.FilterList,
-        "Trabajo" to Icons.Default.Work,
-        "Personal" to Icons.Default.Person,
-        "Ideas" to Icons.Default.Lightbulb,
-        "Estudio" to Icons.AutoMirrored.Filled.MenuBook,
-        "Favoritas" to Icons.Default.Star
+        "all" to Icons.Default.FilterList,
+        "work" to Icons.Default.Work,
+        "personal" to Icons.Default.Person,
+        "ideas" to Icons.Default.Lightbulb,
+        "study" to Icons.AutoMirrored.Filled.MenuBook,
+        "favorites" to Icons.Default.Star
     )
 
+    // Ordenación automática: Fijadas primero, luego por fecha de creación descendente
     val filteredTareas = remember(tareas, selectedCategory) {
         tareas.filter { 
-            (selectedCategory == "Todas" || (selectedCategory == "Favoritas" && it.esFavorita) || it.contenido.contains("#${selectedCategory.lowercase()}"))
-        }
+            (selectedCategory == "all" || (selectedCategory == "favorites" && it.esFavorita) || it.contenido.contains("#$selectedCategory"))
+        }.sortedWith(compareByDescending<Tarea> { it.esFavorita }.thenByDescending { it.fechaCreacion })
     }
 
     val pinnedTareas = remember(filteredTareas) { filteredTareas.filter { it.esFavorita } }
     val recentTareas = remember(filteredTareas) { filteredTareas.filter { !it.esFavorita } }
 
     Box(modifier = Modifier.fillMaxSize().background(BackgroundDark)) {
-        // Fondo con iluminación ambiental Noctra
+        // Fondo Noctra Premium
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .drawBehind {
                     drawRect(
                         Brush.radialGradient(
-                            colors = listOf(SamsungGreen.copy(alpha = 0.04f), Color.Transparent),
-                            center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.1f),
-                            radius = size.width * 1.6f
+                            colors = listOf(SamsungGreen.copy(alpha = 0.03f), Color.Transparent),
+                            center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f),
+                            radius = size.width * 1.5f
                         )
                     )
                 }
@@ -91,19 +91,10 @@ fun NotesScreen(
 
         Scaffold(
             containerColor = Color.Transparent,
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { onNavigateToEditor(listaId, -1) },
-                    containerColor = SamsungGreen,
-                    contentColor = Color.Black,
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .padding(bottom = 90.dp, end = 12.dp)
-                        .size(72.dp)
-                        .shadow(24.dp, CircleShape, spotColor = SamsungGreen)
-                ) {
-                    Icon(Icons.Default.Add, null, modifier = Modifier.size(36.dp))
-                }
+            topBar = {
+                NoteTopBarPremium(
+                    onAddClick = { onNavigateToEditor(listaId, -1) }
+                )
             }
         ) { padding ->
             LazyVerticalStaggeredGrid(
@@ -111,118 +102,239 @@ fun NotesScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 180.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalItemSpacing = 16.dp
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 120.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalItemSpacing = 14.dp
             ) {
-                // Header span
+                // Título y Subtítulo integrado en la lista para mejor scroll
                 item(span = StaggeredGridItemSpan.FullLine) {
-                    NoteHeaderLocal(selectedLanguage, onBack)
+                    Column(modifier = Modifier.padding(top = 12.dp, bottom = 24.dp)) {
+                        Text(
+                            text = stringResource(R.string.notes),
+                            style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Organiza tus ideas con Noctra",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = GrayText.copy(alpha = 0.6f)
+                        )
+                    }
                 }
 
-                // Chips span
+                // Chips de categorías
                 item(span = StaggeredGridItemSpan.FullLine) {
-                    NoteCategoryChipsLocal(categories, selectedCategory, { selectedCategory = it }, selectedLanguage)
+                    NoteCategoryChipsLocal(categories, selectedCategory, { selectedCategory = it })
                 }
 
-                // Fijadas Section
+                // Sección Fijadas
                 if (pinnedTareas.isNotEmpty()) {
                     item(span = StaggeredGridItemSpan.FullLine) {
-                        SectionHeaderLocal(getTranslatedText("Fijadas", selectedLanguage), "Ver todas", {})
-                    }
-                    item(span = StaggeredGridItemSpan.FullLine) {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(pinnedTareas) { tarea ->
-                                PinnedNoteCardLocal(tarea, onClick = { onNavigateToEditor(listaId, tarea.id) })
-                            }
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
+                            Icon(Icons.Rounded.PushPin, null, tint = SamsungGreen, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.pinned), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         }
                     }
-                    item(span = StaggeredGridItemSpan.FullLine) { Spacer(modifier = Modifier.height(32.dp)) }
+                    items(pinnedTareas, key = { it.id }) { tarea ->
+                        var showDeleteConfirm by remember { mutableStateOf(false) }
+                        
+                        NoteGridCardPremium(
+                            tarea = tarea, 
+                            onClick = { onNavigateToEditor(listaId, tarea.id) },
+                            onLongClick = { showDeleteConfirm = true }
+                        )
+
+                        if (showDeleteConfirm) {
+                            AlertDialog(
+                                onDismissRequest = { showDeleteConfirm = false },
+                                containerColor = CardDark,
+                                shape = RoundedCornerShape(28.dp),
+                                title = { Text("¿Eliminar nota?", color = Color.White, fontWeight = FontWeight.Bold) },
+                                text = { Text("Esta acción no se puede deshacer.", color = GrayText) },
+                                confirmButton = {
+                                    Button(
+                                        onClick = {
+                                            viewModel.borrarTarea(tarea)
+                                            showDeleteConfirm = false
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = SamsungRed),
+                                        shape = RoundedCornerShape(14.dp)
+                                    ) {
+                                        Text("Eliminar", color = Color.White, fontWeight = FontWeight.Bold)
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showDeleteConfirm = false }) {
+                                        Text("Cancelar", color = GrayText)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    item(span = StaggeredGridItemSpan.FullLine) { 
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(color = Color.White.copy(alpha = 0.05f))
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
 
-                // Recientes Title
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    SectionHeaderLocal(getTranslatedText("Recientes", selectedLanguage), "Ver todo", {}, icon = Icons.Default.AccessTime)
+                // Título Recientes si hay notas
+                if (recentTareas.isNotEmpty()) {
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        Text(
+                            stringResource(R.string.recent_notes), 
+                            color = Color.White.copy(alpha = 0.5f), 
+                            fontWeight = FontWeight.Bold, 
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
                 }
 
                 if (recentTareas.isEmpty() && pinnedTareas.isEmpty()) {
                     item(span = StaggeredGridItemSpan.FullLine) {
-                        NoteEmptyStateLocal(selectedLanguage)
+                        NoteEmptyStatePremium()
                     }
                 } else {
                     items(recentTareas, key = { it.id }) { tarea ->
-                        NoteGridCardLocal(tarea, onClick = { onNavigateToEditor(listaId, tarea.id) })
+                        var showDeleteConfirm by remember { mutableStateOf(false) }
+
+                        NoteGridCardPremium(
+                            tarea = tarea, 
+                            onClick = { onNavigateToEditor(listaId, tarea.id) },
+                            onLongClick = { showDeleteConfirm = true }
+                        )
+
+                        if (showDeleteConfirm) {
+                            AlertDialog(
+                                onDismissRequest = { showDeleteConfirm = false },
+                                containerColor = CardDark,
+                                shape = RoundedCornerShape(28.dp),
+                                title = { Text("¿Eliminar nota?", color = Color.White, fontWeight = FontWeight.Bold) },
+                                text = { Text("Esta acción no se puede deshacer.", color = GrayText) },
+                                confirmButton = {
+                                    Button(
+                                        onClick = {
+                                            viewModel.borrarTarea(tarea)
+                                            showDeleteConfirm = false
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = SamsungRed),
+                                        shape = RoundedCornerShape(14.dp)
+                                    ) {
+                                        Text("Eliminar", color = Color.White, fontWeight = FontWeight.Bold)
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showDeleteConfirm = false }) {
+                                        Text("Cancelar", color = GrayText)
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
+            }
+        }
+    }
+}
 
-                // Banner Inferior
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    Spacer(modifier = Modifier.height(40.dp))
-                    EscribeSinLimitesBannerLocal(selectedLanguage, { onNavigateToEditor(listaId, -1) })
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NoteTopBarPremium(onAddClick: () -> Unit) {
+    CenterAlignedTopAppBar(
+        title = { /* Título manejado en el scroll para estilo Samsung */ },
+        navigationIcon = {
+            // Sin botón de retroceso por ser pantalla principal de la barra inferior
+        },
+        actions = {
+            Surface(
+                onClick = onAddClick,
+                shape = CircleShape,
+                color = SamsungGreen.copy(alpha = 0.1f),
+                border = BorderStroke(1.dp, SamsungGreen.copy(alpha = 0.2f)),
+                modifier = Modifier.padding(end = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Rounded.Add, null, tint = SamsungGreen, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Nueva", color = SamsungGreen, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
             }
-        }
-    }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+    )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NoteHeaderLocal(language: String, onBack: () -> Unit) {
-    Row(
+fun NoteGridCardPremium(tarea: Tarea, onClick: () -> Unit, onLongClick: () -> Unit) {
+    val cardColor = if (tarea.color != null) Color(tarea.color) else Color(0xFF1A1A1A)
+    
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 24.dp, bottom = 28.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+            .animateContentSize(),
+        shape = RoundedCornerShape(24.dp),
+        color = cardColor.copy(alpha = 0.9f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
     ) {
         Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = getTranslatedText("Notas", language),
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 44.sp,
-                        letterSpacing = (-1.5).sp
-                    ),
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground), // Placeholder for pencil icon
+            if (tarea.imagenPath != null) {
+                AsyncImage(
+                    model = tarea.imagenPath,
                     contentDescription = null,
-                    tint = SamsungGreen,
-                    modifier = Modifier.size(28.dp).offset(y = 6.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 160.dp)
+                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+                    contentScale = ContentScale.Crop
                 )
             }
-            Text(
-                text = getTranslatedText("Tus ideas, siempre contigo.", language),
-                style = MaterialTheme.typography.bodyMedium,
-                color = GrayText.copy(alpha = 0.7f)
-            )
-        }
-        Row(modifier = Modifier.padding(top = 8.dp)) {
-            HeaderCircleButtonLocal(Icons.Default.Search)
-            Spacer(modifier = Modifier.width(12.dp))
-            HeaderCircleButtonLocal(Icons.Default.FilterList)
-            Spacer(modifier = Modifier.width(12.dp))
-            HeaderCircleButtonLocal(Icons.Default.MoreVert)
-        }
-    }
-}
 
-@Composable
-fun HeaderCircleButtonLocal(icon: ImageVector, onClick: () -> Unit = {}) {
-    Surface(
-        modifier = Modifier.size(48.dp),
-        shape = CircleShape,
-        color = Color.White.copy(alpha = 0.06f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
-        onClick = onClick
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(icon, null, tint = Color.White, modifier = Modifier.size(24.dp))
+            Column(modifier = Modifier.padding(16.dp)) {
+                if (tarea.esFavorita) {
+                    Icon(Icons.Rounded.PushPin, null, tint = SamsungGreen, modifier = Modifier.size(14.dp).align(Alignment.End))
+                }
+
+                if (tarea.titulo.isNotBlank()) {
+                    Text(
+                        text = tarea.titulo,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+
+                if (tarea.contenido.isNotBlank()) {
+                    Text(
+                        text = tarea.contenido,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.7f),
+                        maxLines = 8,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Fecha de creación
+                val dateFormat = remember { java.text.SimpleDateFormat("dd MMM", Locale.getDefault()) }
+                Text(
+                    text = dateFormat.format(Date(tarea.fechaCreacion)),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.4f)
+                )
+            }
         }
     }
 }
@@ -231,357 +343,54 @@ fun HeaderCircleButtonLocal(icon: ImageVector, onClick: () -> Unit = {}) {
 fun NoteCategoryChipsLocal(
     categories: List<Pair<String, ImageVector>>,
     selectedCategory: String,
-    onCategorySelect: (String) -> Unit,
-    language: String
+    onCategorySelect: (String) -> Unit
 ) {
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(bottom = 32.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.padding(bottom = 8.dp)
     ) {
-        items(categories) { (name, icon) ->
+        items(categories) { (name, _) ->
             val isSelected = selectedCategory == name
+            val stringId = when(name) {
+                "all" -> R.string.all
+                "work" -> R.string.work
+                "personal" -> R.string.personal
+                "ideas" -> R.string.ideas
+                "study" -> R.string.study
+                "favorites" -> R.string.favorites
+                else -> R.string.all
+            }
             Surface(
                 onClick = { onCategorySelect(name) },
-                shape = RoundedCornerShape(26.dp),
-                color = if (isSelected) SamsungGreen.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.05f),
-                border = BorderStroke(1.dp, if (isSelected) SamsungGreen.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.08f)),
-                modifier = Modifier.animateContentSize()
+                shape = RoundedCornerShape(16.dp),
+                color = if (isSelected) SamsungGreen else Color.White.copy(alpha = 0.05f),
+                border = BorderStroke(1.dp, if (isSelected) Color.Transparent else Color.White.copy(alpha = 0.1f)),
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        icon,
-                        contentDescription = null,
-                        tint = if (isSelected) SamsungGreen else GrayText,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = getTranslatedText(name, language),
-                        color = if (isSelected) Color.White else GrayText,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun SectionHeaderLocal(title: String, actionText: String, onActionClick: () -> Unit, icon: ImageVector = Icons.Default.StarBorder) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, null, tint = SamsungGreen, modifier = Modifier.size(22.dp))
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-        }
-        Text(
-            actionText + " >",
-            color = SamsungGreen,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.clickable { onActionClick() }
-        )
-    }
-}
-
-@Composable
-fun PinnedNoteCardLocal(tarea: Tarea, onClick: () -> Unit) {
-    val color = when {
-        tarea.titulo.contains("Plan", true) -> SamsungGreen
-        tarea.titulo.contains("Ideas", true) -> SamsungPurple
-        else -> SamsungGreen
-    }
-
-    Surface(
-        modifier = Modifier
-            .width(280.dp)
-            .height(160.dp)
-            .clickable { onClick() }
-            .shadow(20.dp, RoundedCornerShape(32.dp), ambientColor = Color.Black),
-        shape = RoundedCornerShape(32.dp),
-        color = Color.White.copy(alpha = 0.07f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Línea de color lateral
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight()
-                    .background(color)
-            )
-            
-            Column(modifier = Modifier.padding(24.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                        Box(modifier = Modifier.size(10.dp).background(color, CircleShape))
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            tarea.titulo,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
-                            color = Color.White,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Icon(Icons.Default.PushPin, null, tint = color, modifier = Modifier.size(18.dp))
-                }
-                Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    tarea.contenido,
-                    style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
-                    color = GrayText.copy(alpha = 0.9f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    text = stringResource(stringId),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = if (isSelected) Color.Black else Color.White,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = color.copy(alpha = 0.12f)
-                    ) {
-                        Text(
-                            if (color == SamsungGreen) "Trabajo" else "Ideas",
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                            fontSize = 11.sp,
-                            color = color,
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                    }
-                    Text("Hoy", fontSize = 11.sp, color = GrayText.copy(alpha = 0.6f))
-                }
             }
         }
     }
 }
 
 @Composable
-fun NoteGridCardLocal(tarea: Tarea, onClick: () -> Unit) {
-    val color = when {
-        tarea.titulo.contains("Trabajo", true) || tarea.contenido.contains("#trabajo", true) -> SamsungGreen
-        tarea.titulo.contains("Personal", true) || tarea.contenido.contains("#personal", true) -> SamsungBlue
-        tarea.titulo.contains("Ideas", true) || tarea.contenido.contains("#ideas", true) -> SamsungPurple
-        tarea.titulo.contains("Estudio", true) || tarea.contenido.contains("#estudio", true) -> SamsungOrange
-        else -> SamsungGreen
-    }
-
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .shadow(8.dp, RoundedCornerShape(28.dp)),
-        shape = RoundedCornerShape(28.dp),
-        color = Color.White.copy(alpha = 0.05f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
-    ) {
-        Column {
-            // Case for different note types (IMAGE)
-            if (tarea.imagenPath != null) {
-                AsyncImage(
-                    model = tarea.imagenPath,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 200.dp)
-                        .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            Column(modifier = Modifier.padding(20.dp)) {
-                // Header Row (Icon + Extra Info like Audio duration)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val typeIcon = when {
-                        tarea.audioPath != null -> Icons.Default.Mic
-                        tarea.imagenPath != null -> Icons.Default.Image
-                        tarea.contenido.contains("\n-") -> Icons.Default.CheckBox
-                        tarea.contenido.contains("http") -> Icons.Default.Link
-                        else -> Icons.Default.Description
-                    }
-                    Icon(typeIcon, null, tint = color, modifier = Modifier.size(18.dp))
-                    
-                    if (tarea.audioPath != null) {
-                        Text("02:45", style = MaterialTheme.typography.labelSmall, color = GrayText)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                if (tarea.titulo.isNotBlank()) {
-                    Text(
-                        text = tarea.titulo,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 17.sp),
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                // Content (Text or Checklist simulation)
-                if (tarea.contenido.isNotBlank()) {
-                    if (tarea.contenido.contains("\n-")) { 
-                        tarea.contenido.split("\n").filter { it.isNotBlank() }.take(4).forEach { line ->
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
-                                Icon(Icons.Default.CheckBoxOutlineBlank, null, tint = GrayText, modifier = Modifier.size(14.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(line.trim('-',' '), style = MaterialTheme.typography.bodySmall, color = GrayText, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            }
-                        }
-                    } else if (tarea.contenido.contains("http")) {
-                        Text(
-                            text = tarea.contenido,
-                            style = MaterialTheme.typography.bodySmall.copy(color = color, textDecoration = TextDecoration.Underline),
-                            maxLines = 4,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    } else {
-                        Text(
-                            text = tarea.contenido,
-                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
-                            color = GrayText.copy(alpha = 0.85f),
-                            maxLines = 6,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = color.copy(alpha = 0.12f)
-                    ) {
-                        Text(
-                            if (color == SamsungGreen) "Trabajo" else if (color == SamsungBlue) "Personal" else if (color == SamsungPurple) "Ideas" else "Estudio",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            fontSize = 9.sp,
-                            color = color,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Text("13 mayo", fontSize = 9.sp, color = GrayText.copy(alpha = 0.5f))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun EscribeSinLimitesBannerLocal(language: String, onClick: () -> Unit) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .shadow(12.dp, RoundedCornerShape(36.dp), spotColor = SamsungGreen),
-        shape = RoundedCornerShape(36.dp),
-        color = Color.White.copy(alpha = 0.04f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
-    ) {
-        Row(
-            modifier = Modifier.padding(28.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .background(SamsungGreen.copy(alpha = 0.12f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.NoteAdd,
-                    null,
-                    tint = SamsungGreen,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(24.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = getTranslatedText("Escribe sin límites", language),
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-                Text(
-                    text = getTranslatedText("Añade texto, imágenes, grabaciones, enlaces y mucho más.", language),
-                    color = GrayText.copy(alpha = 0.8f),
-                    fontSize = 13.sp,
-                    lineHeight = 18.sp
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        getTranslatedText("Crear nueva nota", language),
-                        color = SamsungGreen,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = SamsungGreen, modifier = Modifier.size(16.dp))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NoteEmptyStateLocal(language: String) {
+fun NoteEmptyStatePremium() {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(top = 80.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .background(SamsungGreen.copy(alpha = 0.06f), CircleShape)
-                    .blur(50.dp)
-            )
-            Icon(
-                Icons.Default.EditNote, 
-                null, 
-                modifier = Modifier.size(110.dp), 
-                tint = Color.White.copy(alpha = 0.08f)
-            )
+            Box(modifier = Modifier.size(120.dp).background(SamsungGreen.copy(alpha = 0.05f), CircleShape).blur(40.dp))
+            Icon(Icons.Default.EditNote, null, modifier = Modifier.size(80.dp), tint = Color.White.copy(alpha = 0.05f))
         }
-        Spacer(modifier = Modifier.height(28.dp))
-        Text(
-            getTranslatedText("Tus ideas comienzan aquí ✨", language), 
-            color = Color.White, 
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            getTranslatedText("Crea tu primera nota inteligente.", language), 
-            color = GrayText.copy(alpha = 0.6f), 
-            style = MaterialTheme.typography.bodyMedium
-        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(stringResource(R.string.ideas_begin_here), color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.create_first_smart_note), color = GrayText.copy(alpha = 0.5f), style = MaterialTheme.typography.bodySmall)
     }
 }

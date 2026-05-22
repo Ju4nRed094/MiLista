@@ -57,26 +57,7 @@ fun NoctraTheme(
     val view = LocalView.current
     
     val dynamicTypography = remember(selectedFontFamily, selectedFontSize) {
-        val baseTypography = getTypography(selectedFontFamily)
-        val ratio = selectedFontSize / 16f
-        
-        baseTypography.copy(
-            displayLarge = baseTypography.displayLarge.copy(fontSize = baseTypography.displayLarge.fontSize * ratio),
-            displayMedium = baseTypography.displayMedium.copy(fontSize = baseTypography.displayMedium.fontSize * ratio),
-            displaySmall = baseTypography.displaySmall.copy(fontSize = baseTypography.displaySmall.fontSize * ratio),
-            headlineLarge = baseTypography.headlineLarge.copy(fontSize = baseTypography.headlineLarge.fontSize * ratio),
-            headlineMedium = baseTypography.headlineMedium.copy(fontSize = baseTypography.headlineMedium.fontSize * ratio),
-            headlineSmall = baseTypography.headlineSmall.copy(fontSize = baseTypography.headlineSmall.fontSize * ratio),
-            titleLarge = baseTypography.titleLarge.copy(fontSize = baseTypography.titleLarge.fontSize * ratio),
-            titleMedium = baseTypography.titleMedium.copy(fontSize = baseTypography.titleMedium.fontSize * ratio),
-            titleSmall = baseTypography.titleSmall.copy(fontSize = baseTypography.titleSmall.fontSize * ratio),
-            bodyLarge = baseTypography.bodyLarge.copy(fontSize = baseTypography.bodyLarge.fontSize * ratio),
-            bodyMedium = baseTypography.bodyMedium.copy(fontSize = baseTypography.bodyMedium.fontSize * ratio),
-            bodySmall = baseTypography.bodySmall.copy(fontSize = baseTypography.bodySmall.fontSize * ratio),
-            labelLarge = baseTypography.labelLarge.copy(fontSize = baseTypography.labelLarge.fontSize * ratio),
-            labelMedium = baseTypography.labelMedium.copy(fontSize = baseTypography.labelMedium.fontSize * ratio),
-            labelSmall = baseTypography.labelSmall.copy(fontSize = baseTypography.labelSmall.fontSize * ratio)
-        )
+        getTypography(selectedFontFamily, selectedFontSize)
     }
 
     if (!view.isInEditMode) {
