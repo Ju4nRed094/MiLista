@@ -295,10 +295,10 @@ class MiListaViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun agregarAlarma(hora: Int, minuto: Int, dias: String, etiqueta: String, tonoUri: String? = null) {
+    fun agregarAlarma(hora: Int, minuto: Int, dias: String, etiqueta: String) {
         viewModelScope.launch {
-            val id = repository.insertarAlarma(Alarma(hora = hora, minuto = minuto, dias = dias, etiqueta = etiqueta, tonoUri = tonoUri))
-            val nuevaAlarma = Alarma(id = id.toInt(), hora = hora, minuto = minuto, dias = dias, etiqueta = etiqueta, tonoUri = tonoUri, activa = true)
+            val id = repository.insertarAlarma(Alarma(hora = hora, minuto = minuto, dias = dias, etiqueta = etiqueta))
+            val nuevaAlarma = Alarma(id = id.toInt(), hora = hora, minuto = minuto, dias = dias, etiqueta = etiqueta, activa = true)
             programarAlarma(nuevaAlarma)
         }
     }

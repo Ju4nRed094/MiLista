@@ -50,14 +50,14 @@ fun CalendarScreen(
 ) {
     val selectedLanguage by viewModel.selectedLanguage.collectAsState()
     val recordatorios by viewModel.recordatorios.collectAsState()
-    
+
     var currentMonthDate by remember { mutableStateOf(Calendar.getInstance()) }
     var selectedDate by remember { mutableStateOf(Calendar.getInstance()) }
     // Usamos el ID del recurso para el estado de la pestaña para que sea dinámico
     var selectedTabId by remember { mutableIntStateOf(R.string.month) }
 
     val today = Calendar.getInstance()
-    
+
     Scaffold(
         containerColor = AmoledBlack
     ) { padding ->
@@ -98,8 +98,8 @@ fun CalendarScreen(
                 AnimatedContent(
                     targetState = selectedTabId,
                     transitionSpec = {
-                        fadeIn(tween(400)) + slideInHorizontally() togetherWith 
-                        fadeOut(tween(400)) + slideOutHorizontally()
+                        fadeIn(tween(400)) + slideInHorizontally() togetherWith
+                                fadeOut(tween(400)) + slideOutHorizontally()
                     },
                     label = "calendarContentTransition"
                 ) { targetTabId ->
@@ -112,6 +112,7 @@ fun CalendarScreen(
                             recordatorios = recordatorios,
                             selectedLanguage = selectedLanguage
                         )
+
                         R.string.week -> WeekViewContent(
                             startDate = currentMonthDate,
                             selectedDate = selectedDate,
@@ -120,10 +121,12 @@ fun CalendarScreen(
                             recordatorios = recordatorios,
                             selectedLanguage = selectedLanguage
                         )
+
                         R.string.day -> DayViewContent(
                             selectedDate = selectedDate,
                             recordatorios = recordatorios
                         )
+
                         R.string.agenda -> AgendaViewContent(
                             recordatorios = recordatorios,
                             today = today

@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 
@@ -24,11 +25,13 @@ class ReminderReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
 
+        val tonoUri = Uri.parse("android.resource://" + context.packageName + "/" + com.example.milista.R.raw.alarma)
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("MiLista: ¡Es hora!")
+            .setContentTitle("Noctra: ¡Es hora!")
             .setContentText(title)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSound(tonoUri)
             .setAutoCancel(true)
             .build()
 

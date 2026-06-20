@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -88,7 +87,7 @@ class AlarmReceiver : BroadcastReceiver() {
             .addAction(android.R.drawable.ic_menu_recent_history, "Posponer (5 min)", snoozePendingIntent)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Descartar", dismissPendingIntent)
 
-        val tonoUri = tonoUriString?.let { Uri.parse(it) } ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        val tonoUri = Uri.parse("android.resource://" + context.packageName + "/" + com.example.milista.R.raw.alarma)
         notificationBuilder.setSound(tonoUri)
 
         notificationManager.notify(alarmId, notificationBuilder.build())
